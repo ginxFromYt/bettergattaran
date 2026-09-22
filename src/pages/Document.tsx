@@ -23,6 +23,7 @@ import {
   type CategoryIndex,
 } from '../data/yamlLoader';
 import SEO from '../components/SEO';
+import { sanitizeLegacyServiceContent } from '../lib/legacyContent';
 
 interface DocumentProps {
   theme?: string;
@@ -47,13 +48,10 @@ export default function Document({
   const [breadcrumbs, setBreadcrumbs] = useState([
     { label: 'Home', href: '/' },
   ]);
+  const hasDocumentRequest = Boolean(documentSlug && category && categoryType);
 
   useEffect(() => {
-    if (!documentSlug || !category || !categoryType) {
-      setError('No document specified');
-      setLoading(false);
-      return;
-    }
+    if (!documentSlug || !category || !categoryType) return;
 
     const loadContent = async () => {
       try {
@@ -87,11 +85,15 @@ export default function Document({
           return;
         }
 
-        const content = await loadMarkdownContent(
+        const loadedContent = await loadMarkdownContent(
           documentSlug,
           category,
           categoryType
         );
+        const content =
+          categoryType === 'service'
+            ? sanitizeLegacyServiceContent(loadedContent)
+            : loadedContent;
         setMarkdownContent(content);
 
         setBreadcrumbs([
@@ -117,6 +119,20 @@ export default function Document({
 
     loadContent();
   }, [documentSlug, category, categoryType]);
+
+  if (!hasDocumentRequest) {
+    return (
+      <Section className="p-3 mb-12">
+        <Breadcrumbs className="mb-8" items={breadcrumbs} />
+        <Banner
+          type="error"
+          title="Document Not Found"
+          description="No document specified"
+          icon
+        />
+      </Section>
+    );
+  }
 
   if (loading) {
     return (
@@ -214,6 +230,14 @@ export default function Document({
       />
       <Section className="p-3 mb-12">
         <Breadcrumbs className="mb-8" items={breadcrumbs} />
+        {categoryType === 'service' && (
+          <Banner
+            type="info"
+            title="Verification notice"
+            description="This inherited service guide is template content and may not describe current Municipality of Gattaran requirements, fees, contacts, or procedures. Verify details with the appropriate government office before relying on it."
+            icon
+          />
+        )}
         <Card className="mb-8 markdown-content">
           <CardHeader>
             {markdownContent.description && (
