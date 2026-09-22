@@ -301,6 +301,14 @@ When officials change, **only update the JSON file** — no need to touch the ma
 }
 ```
 
+## Source and verification metadata
+
+Municipality-specific facts must follow [`docs/content-verification.md`](docs/content-verification.md). A page is shown in category listings only when its `index.yaml` entry contains `published: true`. Add that flag only after review.
+
+Use the page's companion JSON file to record `provenance.status`, `verifiedAt`, optional `asOf`, and one or more source entries. Each source requires a title, issuing organization, and authoritative HTTP(S) URL. The site renders this information at the end of the page.
+
+Do not publish guessed officials, contacts, fees, requirements, schedules, emergency numbers, or procedures. General national guidance must not be described as a Gattaran procedure.
+
 ## 🌐 Multilingual Content
 
 ### Language Considerations

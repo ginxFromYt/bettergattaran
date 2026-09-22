@@ -4,7 +4,7 @@
 categories:
   - category: 'Municipal Government'
     slug: 'departments'
-    description: 'A space for verified information about the Municipality of Gattaran and its offices. Office names, officials, and contacts are pending verification.'
+    description: 'Verified administrative, barangay, and municipal leadership information for Gattaran. A complete office directory and contact details are pending verification.'
     icon: 'Building2'
   - category: 'Public Information'
     slug: 'news'
@@ -42,7 +42,7 @@ categories:
         slug: 'public-consultations'
   - category: 'Transparency Documents'
     slug: 'transparency-documents'
-    description: 'A space for verified transparency, procurement, budget, and Freedom of Information records.'
+    description: 'Authoritative public-record repositories and, when verified, links to Gattaran transparency, procurement, budget, and audit records.'
     icon: 'FileText'
     subcategories:
       - name: 'Transparency Documents'

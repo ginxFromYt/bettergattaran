@@ -1,0 +1,20 @@
+{
+  "provenance": {
+    "status": "verified",
+    "verifiedAt": "2026-09-22",
+    "asOf": "2025-07-31",
+    "sources": [
+      {
+        "title": "Municipality of Gattaran",
+        "organization": "Philippine Statistics Authority",
+        "url": "https://psa.gov.ph/classification/psgc/barangays/0201513000",
+        "asOf": "2025-07-31"
+      },
+      {
+        "title": "Philippine Standard Geographic Code Summary",
+        "organization": "Philippine Statistics Authority",
+        "url": "https://psa.gov.ph/classification/psgc/summary"
+      }
+    ]
+  }
+}

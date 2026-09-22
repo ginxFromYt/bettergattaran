@@ -86,5 +86,40 @@ describe('Better Gattaran baseline', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Verification notice')).toBeInTheDocument();
     expect(document.body).not.toHaveTextContent(/Lapu[\s-]?Lapu/i);
+    expect(
+      screen.getByText('Information pending verification')
+    ).toBeInTheDocument();
+  });
+
+  it('routes verified municipal content with visible provenance', async () => {
+    renderRoute('/government/departments/municipality-overview');
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Municipality of Gattaran overview',
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('59,704 (2024 Census of Population)')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Verified public information')).toBeInTheDocument();
+    expect(screen.getByText('Last verified:')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Municipality of Gattaran' })
+    ).toHaveAttribute(
+      'href',
+      'https://psa.gov.ph/classification/psgc/barangays/0201513000'
+    );
+  });
+
+  it('keeps unverified service listings in a pending state', async () => {
+    renderRoute('/services/health-services');
+
+    expect(
+      await screen.findByText('Local service details pending verification')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Get free check-ups, basic medicines, and vaccines')
+    ).not.toBeInTheDocument();
   });
 });
