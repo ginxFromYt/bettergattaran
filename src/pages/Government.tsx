@@ -118,6 +118,14 @@ const Government: React.FC = () => {
                 {categoryIndex.description}
               </Text>
             )}
+            {subcategories.length === 0 && (
+              <Banner
+                type="info"
+                title="Information pending verification"
+                description="No records are published in this section yet. Better Gattaran will add information only after it is checked against an authoritative public source."
+                icon
+              />
+            )}
             {categoryIndex.layout === 'grid' ? (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {subcategories.map(subcategory => (

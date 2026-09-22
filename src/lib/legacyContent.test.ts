@@ -11,6 +11,7 @@ describe('sanitizeLegacyServiceContent', () => {
     expect(result.title).toBe('Service guide pending verification');
     expect(result.content).toContain('refers to another locality');
     expect(result.content).not.toMatch(/Lapu[\s-]?Lapu/i);
+    expect(result.provenance).toEqual({ status: 'pending', sources: [] });
   });
 
   it('leaves non-legacy content unchanged', () => {

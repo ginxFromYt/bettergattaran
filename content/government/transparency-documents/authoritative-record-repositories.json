@@ -1,0 +1,18 @@
+{
+  "provenance": {
+    "status": "verified",
+    "verifiedAt": "2026-09-22",
+    "sources": [
+      {
+        "title": "Annual Audit Reports — Local Government Units",
+        "organization": "Commission on Audit",
+        "url": "https://www.coa.gov.ph/reports/annual-audit-reports/aar-local-government-units/"
+      },
+      {
+        "title": "Municipality of Gattaran",
+        "organization": "Philippine Statistics Authority",
+        "url": "https://psa.gov.ph/classification/psgc/barangays/0201513000"
+      }
+    ]
+  }
+}

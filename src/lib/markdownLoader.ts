@@ -21,6 +21,69 @@ export interface MarkdownContent {
   title?: string;
   description?: string;
   data?: Record<string, unknown>;
+  provenance?: ContentProvenance;
+}
+
+export type VerificationStatus = 'verified' | 'pending';
+
+export interface SourceReference {
+  title: string;
+  organization: string;
+  url: string;
+  asOf?: string;
+}
+
+export interface ContentProvenance {
+  status: VerificationStatus;
+  verifiedAt?: string;
+  asOf?: string;
+  sources: SourceReference[];
+}
+
+function isDate(value: unknown): value is string {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function parseProvenance(value: unknown): ContentProvenance | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+
+  const candidate = value as Record<string, unknown>;
+  if (candidate.status !== 'verified' && candidate.status !== 'pending') {
+    return undefined;
+  }
+
+  const sources = Array.isArray(candidate.sources)
+    ? candidate.sources.flatMap(source => {
+        if (!source || typeof source !== 'object') return [];
+        const entry = source as Record<string, unknown>;
+        if (
+          typeof entry.title !== 'string' ||
+          typeof entry.organization !== 'string' ||
+          typeof entry.url !== 'string' ||
+          !/^https?:\/\//.test(entry.url)
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            title: entry.title,
+            organization: entry.organization,
+            url: entry.url,
+            ...(isDate(entry.asOf) ? { asOf: entry.asOf } : {}),
+          },
+        ];
+      })
+    : [];
+
+  return {
+    status: candidate.status,
+    ...(isDate(candidate.verifiedAt)
+      ? { verifiedAt: candidate.verifiedAt }
+      : {}),
+    ...(isDate(candidate.asOf) ? { asOf: candidate.asOf } : {}),
+    sources,
+  };
 }
 
 /**
@@ -63,7 +126,13 @@ export async function loadMarkdownContent(
       ? descriptionMatch[1].replace(/^>\s*/, '').trim()
       : undefined;
 
-    return { content, title, description, data };
+    return {
+      content,
+      title,
+      description,
+      data,
+      provenance: parseProvenance(data.provenance),
+    };
   } catch (error) {
     console.error(
       `Failed to load markdown content for document: ${documentSlug}`,

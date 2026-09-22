@@ -117,6 +117,7 @@ pages:
   - name: 'Your Service Name'
     slug: 'your-service-name'
     description: 'Brief description of the service.'
+    published: false # A reviewer changes this only after source verification
 ```
 
 5. Save the changes
@@ -138,6 +139,7 @@ pages:
   - name: 'Your First Service'
     slug: 'your-first-service'
     description: 'Description of your first service.'
+    published: false
 ```
 
 #### Step 2: Create Service Content Files
@@ -178,6 +180,7 @@ pages:
   - name: 'Your Department Name'
     slug: 'your-department-name'
     description: 'Brief description of the department.'
+    published: false
 ```
 
 5. Save the changes
@@ -188,17 +191,21 @@ Department pages support `{PLACEHOLDER}` tokens that are automatically replaced 
 
 ```json
 {
-  "GOVERNMENT_NAME": "Lapu Lapu City",
-  "MAYOR": "Ma. Cynthia K. Chan",
-  "MAYOR_HE_SHE": "she",
-  "HONORIFIC_TITLE": "Honorable",
-  "VICE_MAYOR": "Celedonio B. Sitoy",
-  "VICE_MAYOR_HE_SHE": "he",
-  "YEAR_ELECTED": "2022"
+  "provenance": {
+    "status": "verified",
+    "verifiedAt": "YYYY-MM-DD",
+    "sources": [
+      {
+        "title": "Official source title",
+        "organization": "Issuing government organization",
+        "url": "https://government.example/source"
+      }
+    ]
+  }
 }
 ```
 
-To update official names or titles, **edit only the JSON file** — the markdown content updates automatically. If no JSON file exists, placeholders fall back to environment variables (`VITE_MAYOR`, etc.) or are left as-is.
+Dynamic placeholder values may also live in this file. Before publishing an official name or title, update its provenance and follow [`docs/content-verification.md`](docs/content-verification.md). If no JSON value exists, placeholders fall back to matching environment variables or are left as-is.
 
 > **Note:** Adding a brand-new government _category_ (e.g., a section alongside `departments`) requires a developer to register it in `src/data/government.yaml` and `src/data/yamlLoader.ts`.
 

@@ -1,3 +1,13 @@
+# Better Gattaran
+
+Better Gattaran is an independent, volunteer-led, open-source civic information portal for Gattaran, Cagayan. It is not the official website of the Municipality of Gattaran.
+
+The portal currently publishes English content only. Municipality-specific information is shown only when it has an authoritative public source and visible verification metadata. See [the content verification policy](docs/content-verification.md) and [source inventory](docs/sources.md).
+
+## Upstream starter-kit documentation
+
+The project preserves the BetterLocalGov architecture and attribution. The upstream documentation below remains useful for development, but statements about multilingual availability or general LGU deployment do not override Better Gattaran's current configuration and verification policy.
+
 # 🏛️ Local Government Website Starter Kit
 
 A modern, multilingual, and accessible website template designed specifically for local government units (LGUs) in the Philippines. Built with React, TypeScript, and Tailwind CSS.

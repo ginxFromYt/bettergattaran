@@ -1,4 +1,17 @@
-# Verified municipal government pages will be listed here.
-title: 'Municipal Government'
-description: 'Office structure, elected officials, department heads, and contact details are pending verification from authoritative Municipality of Gattaran sources.'
-pages: []
+# Only pages backed by the source metadata in their companion JSON are listed.
+title: 'Municipality and Government'
+description: 'Verified public information about Gattaran and its municipal government. Unverified office, contact, and official details remain unpublished.'
+layout: grid
+pages:
+  - name: 'Municipality overview'
+    slug: 'municipality-overview'
+    published: true
+    description: 'Administrative identity, PSGC codes, income classification, population context, and barangay count.'
+  - name: 'Barangays'
+    slug: 'barangays'
+    published: true
+    description: 'The official Philippine Statistics Authority list of Gattaran barangays.'
+  - name: 'Municipal mayor'
+    slug: 'municipal-mayor'
+    published: true
+    description: 'The current municipal mayor listed by the Provincial Government of Cagayan.'

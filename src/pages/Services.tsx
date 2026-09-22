@@ -118,6 +118,14 @@ const Services: React.FC = () => {
                 {categoryIndex.description}
               </Text>
             )}
+            {subcategories.length === 0 && (
+              <Banner
+                type="info"
+                title="Local service details pending verification"
+                description="No Gattaran-specific procedure is published in this category yet. Requirements, fees, schedules, contacts, and processing times will be added only from authoritative sources."
+                icon
+              />
+            )}
             {categoryIndex.layout === 'grid' ? (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {subcategories.map(subcategory => (

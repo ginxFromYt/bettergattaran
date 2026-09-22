@@ -24,6 +24,7 @@ import {
 } from '../data/yamlLoader';
 import SEO from '../components/SEO';
 import { sanitizeLegacyServiceContent } from '../lib/legacyContent';
+import ContentProvenance from '../components/content/ContentProvenance';
 
 interface DocumentProps {
   theme?: string;
@@ -230,14 +231,15 @@ export default function Document({
       />
       <Section className="p-3 mb-12">
         <Breadcrumbs className="mb-8" items={breadcrumbs} />
-        {categoryType === 'service' && (
-          <Banner
-            type="info"
-            title="Verification notice"
-            description="This inherited service guide is template content and may not describe current Municipality of Gattaran requirements, fees, contacts, or procedures. Verify details with the appropriate government office before relying on it."
-            icon
-          />
-        )}
+        {categoryType === 'service' &&
+          markdownContent.provenance?.status !== 'verified' && (
+            <Banner
+              type="info"
+              title="Verification notice"
+              description="This inherited service guide is template content and may not describe current Municipality of Gattaran requirements, fees, contacts, or procedures. Verify details with the appropriate government office before relying on it."
+              icon
+            />
+          )}
         <Card className="mb-8 markdown-content">
           <CardHeader>
             {markdownContent.description && (
@@ -249,6 +251,7 @@ export default function Document({
             >
               {markdownContent.content}
             </ReactMarkdown>
+            <ContentProvenance provenance={markdownContent.provenance} />
           </CardHeader>
         </Card>
       </Section>
