@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Heading } from '../ui/Heading';
 import { Text } from '../ui/Text';
+import CurrentWeatherCard from '../weather/CurrentWeatherCard';
 
 export default function Hero() {
   const { t } = useTranslation();
@@ -24,6 +25,9 @@ export default function Hero() {
             <Text className="mt-4 text-primary-100">
               {governmentName} · {province} · {region}
             </Text>
+          </div>
+          <div className="animate-fade-in lg:justify-self-end lg:w-full lg:max-w-md">
+            <CurrentWeatherCard />
           </div>
         </div>
       </div>

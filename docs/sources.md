@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-09-23
 
-This inventory records sources considered during Phase 2. Inclusion here does not make every fact on a source suitable for publication.
+This inventory records sources considered during Phases 2–3.1. Inclusion here does not make every fact on a source suitable for publication.
 
 ## General municipality and statistics
 
@@ -25,7 +25,15 @@ This inventory records sources considered during Phase 2. Inclusion here does no
 
 ## Emergency
 
-- No current official source sufficiently established Gattaran emergency, police, fire, ambulance, rescue, health, or MDRRMO numbers. No emergency contacts were published.
+- **Philippine Government eGov PH — PH Emergency Hotlines.** Accepted for the nationwide `911` emergency number. <https://ehotlines.e.gov.ph/>
+- **Provincial Government of Cagayan — Citizens' Charter 2024.** Accepted for Gattaran Emergency Hospital (`0995-323-4947`) and Cagayan PDRRMO (`0975-434-8083`). Both appear in the official office directory; the PDRRMO number is also consistent with the official 2022 charter. <https://www.cagayan.gov.ph/wp-content/uploads/2024/04/PGCagayan-Citizens-Charter-2024-edition-final.pdf>
+- The proposed Gattaran MDRRMO number `0926-652-6027` was not published because no adequate authoritative current source was located.
+- No other Gattaran police, fire, ambulance, rescue, health, or MDRRMO numbers have been published.
+
+## Live weather
+
+- **CIS Mock Backend current-weather endpoint.** Runtime observation source queried using the fixed Gattaran coordinates (`18.054287, 121.970096`); the API currently supplies qualified Gattaran location data, observation time, provider attribution, normalized metrics, nearest-station context, and quality warnings. The frontend always displays the provider returned by the response. <https://cis-mock.ginxproduction.com/api/weather/current?latitude=18.0542870&longitude=121.9700960>
+- CORS checks on 23 September 2026 returned `Vary: Origin` but no `Access-Control-Allow-Origin` header for tested local and likely deployment origins. The API must allow the actual Better Gattaran production origin for direct browser requests.
 
 ## Transparency
 

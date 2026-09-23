@@ -28,6 +28,8 @@ This repository is a static React 19, TypeScript, Vite, and Tailwind application
 
 Draft and archived records are excluded from listings, direct document routes, and search indexing. Published records must have an eligible verification state and valid source metadata.
 
+The homepage also provides repository-verified emergency contacts and live Gattaran weather. Weather readings are dynamic external observations: the UI displays the provider and observation time returned by the CIS public weather API rather than applying repository verification badges to readings.
+
 ## Content governance
 
 Publication and verification are separate:
