@@ -1,0 +1,32 @@
+{
+  "revisions": [
+    {
+      "contentId": "government/departments/municipality-overview",
+      "action": "updated",
+      "changedFields": ["publicationStatus", "provenance"],
+      "responsible": "Better Gattaran maintainers",
+      "timestamp": "2026-09-23T10:49:57+08:00"
+    },
+    {
+      "contentId": "government/departments/barangays",
+      "action": "updated",
+      "changedFields": ["publicationStatus", "provenance"],
+      "responsible": "Better Gattaran maintainers",
+      "timestamp": "2026-09-23T10:49:57+08:00"
+    },
+    {
+      "contentId": "government/departments/municipal-mayor",
+      "action": "updated",
+      "changedFields": ["publicationStatus", "provenance"],
+      "responsible": "Better Gattaran maintainers",
+      "timestamp": "2026-09-23T10:49:57+08:00"
+    },
+    {
+      "contentId": "government/transparency-documents/authoritative-record-repositories",
+      "action": "updated",
+      "changedFields": ["publicationStatus", "provenance"],
+      "responsible": "Better Gattaran maintainers",
+      "timestamp": "2026-09-23T10:49:57+08:00"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Source inventory
 
-Last reviewed: 2026-09-22
+Last reviewed: 2026-09-23
 
 This inventory records sources considered during Phase 2. Inclusion here does not make every fact on a source suitable for publication.
 

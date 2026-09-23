@@ -60,14 +60,41 @@ function loadMarkdownPages(dir, categorySlug, categoryName, type) {
   try {
     const indexYaml = readFileSync(indexPath, 'utf8');
     const indexData = yaml.load(indexYaml);
-    pages = (indexData.pages ?? []).filter(page => page.published === true);
+    pages = (indexData.pages ?? []).filter(page => {
+      const publicationStatus =
+        page.publicationStatus ?? (page.published ? 'published' : 'draft');
+      const verificationStatus =
+        page.verificationStatus ??
+        (page.published ? 'verified' : 'awaiting_verification');
+      const allowSourced = process.env.ALLOW_SOURCED_CONTENT !== 'false';
+      return (
+        publicationStatus === 'published' &&
+        (verificationStatus === 'verified' ||
+          verificationStatus === 'outdated' ||
+          (allowSourced && verificationStatus === 'sourced'))
+      );
+    });
   } catch {
     return documents;
   }
 
   for (const page of pages) {
     const mdPath = join(ROOT, `content/${dir}/${categorySlug}/${page.slug}.md`);
+    const jsonPath = join(
+      ROOT,
+      `content/${dir}/${categorySlug}/${page.slug}.json`
+    );
     try {
+      const companion = JSON.parse(readFileSync(jsonPath, 'utf8'));
+      const allowSourced = process.env.ALLOW_SOURCED_CONTENT !== 'false';
+      const companionStatus = companion.provenance?.verificationStatus;
+      const eligible =
+        companion.publicationStatus === 'published' &&
+        (companionStatus === 'verified' ||
+          companionStatus === 'outdated' ||
+          (allowSourced && companionStatus === 'sourced'));
+      if (!eligible || companionStatus !== page.verificationStatus) continue;
+
       const raw = readFileSync(mdPath, 'utf8');
       const title = extractTitle(raw) || page.name;
       const description = extractDescription(raw) || page.description || '';
@@ -80,6 +107,7 @@ function loadMarkdownPages(dir, categorySlug, categoryName, type) {
         category: categoryName,
         categorySlug,
         slug: page.slug,
+        verificationStatus: companionStatus,
         url: `/${dir === 'services' ? 'services' : 'government'}/${categorySlug}/${page.slug}`,
       });
     } catch {
@@ -147,6 +175,7 @@ async function indexContent() {
       'categorySlug',
       'slug',
       'url',
+      'verificationStatus',
     ],
     rankingRules: [
       'words',

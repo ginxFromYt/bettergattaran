@@ -4,6 +4,7 @@ import { useQueryState } from 'nuqs';
 import { Search as SearchIcon } from 'lucide-react';
 import { searchClient, SEARCH_INDEX } from '../lib/meilisearch';
 import type { SearchHit } from '../lib/meilisearch';
+import VerificationBadge from '../components/content/VerificationBadge';
 
 interface SearchState {
   query: string;
@@ -116,6 +117,7 @@ export default function Search() {
                   >
                     {hit.category}
                   </span>
+                  <VerificationBadge status={hit.verificationStatus} />
                 </div>
                 <h2 className="text-base font-semibold text-gray-900 group-hover:text-primary-700">
                   {hit.title}

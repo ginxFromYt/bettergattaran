@@ -1,12 +1,15 @@
 {
+  "publicationStatus": "published",
   "provenance": {
-    "status": "verified",
-    "verifiedAt": "2026-09-22",
+    "verificationStatus": "verified",
+    "lastVerifiedAt": "2026-09-22",
+    "lastUpdatedAt": "2026-09-23",
     "sources": [
       {
         "title": "City and Municipalities",
         "organization": "Provincial Government of Cagayan",
-        "url": "https://cagayan.gov.ph/city-and-municipalities/"
+        "url": "https://cagayan.gov.ph/city-and-municipalities/",
+        "type": "provincial_government"
       }
     ]
   }

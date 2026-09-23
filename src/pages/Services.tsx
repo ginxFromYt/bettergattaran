@@ -15,6 +15,7 @@ import { Card, CardContent } from '@bettergov/kapwa/card';
 import { Banner } from '@bettergov/kapwa/banner';
 import { useState, useEffect } from 'react';
 import { CategoryIcon } from '../lib/categoryIcons';
+import VerificationBadge from '../components/content/VerificationBadge';
 
 const emptyCategoryIndex: CategoryIndex = { layout: 'list', pages: [] };
 
@@ -146,6 +147,13 @@ const Services: React.FC = () => {
                             {subcategory.description}
                           </p>
                         )}
+                        {subcategory.verificationStatus && (
+                          <div className="mt-3">
+                            <VerificationBadge
+                              status={subcategory.verificationStatus}
+                            />
+                          </div>
+                        )}
                         <span className="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-sm bg-gray-100 text-gray-800">
                           {categoryData.category || category}
                         </span>
@@ -170,6 +178,13 @@ const Services: React.FC = () => {
                           <p className="mt-2 text-sm text-gray-600">
                             {subcategory.description}
                           </p>
+                        )}
+                        {subcategory.verificationStatus && (
+                          <div className="mt-3">
+                            <VerificationBadge
+                              status={subcategory.verificationStatus}
+                            />
+                          </div>
                         )}
                         <span className="inline-block px-2 py-1 mt-2 text-xs font-medium rounded-sm bg-gray-100 text-gray-800">
                           {categoryData.category || category}

@@ -1,47 +1,51 @@
-# Content verification policy
+# Content governance and verification
 
-Better Gattaran is an independent, volunteer-led civic information portal. It is not the official website of the Municipality of Gattaran. This policy applies to all municipality-specific content.
+Better Gattaran is independent and is not the official website of the Municipality of Gattaran. This policy applies to all public-information records.
 
-## Accepted source hierarchy
+## Lifecycle
 
-Use the strongest available source, in this order:
+Publication and verification are intentionally separate.
 
-1. Municipality of Gattaran official pages and public documents
-2. Clearly identifiable official Municipality of Gattaran social accounts
-3. Official Philippine government sources
-4. DILG or BLGS
-5. Philippine Statistics Authority or Philippine Standard Geographic Code
-6. Commission on Audit
-7. DBM or the Full Disclosure Policy Portal
-8. Relevant national agencies
-9. Provincial Government of Cagayan
+| Publication status | Meaning                                                                   |
+| ------------------ | ------------------------------------------------------------------------- |
+| `draft`            | Work in progress; hidden from public listings, direct routes, and search. |
+| `published`        | Public only when the verification state is eligible.                      |
+| `archived`         | Retained for history; hidden from public routes and search.               |
 
-Third-party directories, blogs, scraped lists, search snippets, and social reposts can help locate a primary source but cannot be the sole authority for published municipal facts.
+| Verification status     | Meaning                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `awaiting_verification` | No adequate review has been completed. Cannot be published.                     |
+| `sourced`               | A public source is recorded, but the portal has not independently confirmed it. |
+| `verified`              | A maintainer checked the record against the recorded source.                    |
+| `outdated`              | The record is explicitly identified as potentially non-current.                 |
 
-## Verification procedure
+`VITE_ALLOW_SOURCED_CONTENT=false` prevents sourced records from displaying even when their publication status is `published`.
 
-1. Open the authoritative source and confirm that it identifies Gattaran and the fact being recorded.
-2. Check the publication, effective, census, or record date. Do not imply that an old record is current.
-3. Compare politically sensitive, emergency, contact, fee, and procedure information with a second authoritative source when practical.
-4. Record the source metadata in a companion JSON file.
-5. Set `published: true` in the category index only after the page and its sources have been reviewed.
-6. Check the rendered page, links, mobile layout, and tests before release.
+## Source types
 
-## Required metadata
+Use one controlled value for every source: `lgu_official`, `national_government`, `provincial_government`, `official_government_publication`, `official_government_social_media`, `public_document`, or `other_public_source`. A third-party source must never be labeled official.
 
-Verified Markdown pages use a same-name JSON companion:
+Prefer Municipality of Gattaran sources, then official Philippine government publications and agencies, then the Provincial Government of Cagayan. Directories, search snippets, blogs, scraped lists, reposts, and ordinary third-party sites may help discovery but are not authoritative by themselves.
+
+## Public metadata
+
+Every published Markdown page needs a same-name JSON companion:
 
 ```json
 {
+  "publicationStatus": "published",
   "provenance": {
-    "status": "verified",
-    "verifiedAt": "YYYY-MM-DD",
+    "verificationStatus": "verified",
+    "lastVerifiedAt": "YYYY-MM-DD",
+    "lastUpdatedAt": "YYYY-MM-DD",
     "asOf": "YYYY-MM-DD",
     "sources": [
       {
-        "title": "Source document or page title",
+        "title": "Source title",
         "organization": "Issuing organization",
         "url": "https://government.example/page",
+        "type": "national_government",
+        "publishedAt": "YYYY-MM-DD",
         "asOf": "YYYY-MM-DD"
       }
     ]
@@ -49,34 +53,28 @@ Verified Markdown pages use a same-name JSON companion:
 }
 ```
 
-`asOf` is optional when the source provides no effective date. Multiple source entries are supported. URLs must use HTTP or HTTPS. The UI shows source links, verification date, and effective date without presenting Better Gattaran as the issuing organization.
+Optional dates should be omitted when the source does not supply them. Never substitute `lastUpdatedAt` for `lastVerifiedAt`. Internal review ownership and notes belong in `governance/content-register.json`, which the frontend does not import. Important actions belong in `governance/revisions.json`; normal file changes also remain attributable through Git history.
 
-## Conflicting or outdated sources
+## Workflow
 
-- Prefer the higher-ranked source and the record with the clearest effective date.
-- Do not silently reconcile conflicting names, dates, figures, or contacts.
-- Withhold the disputed field and record the conflict in `docs/sources.md` until the issuing organizations clarify it.
-- Mark stale pages `pending`, remove `published: true`, or replace the outdated statement with a clearly dated historical record.
+1. Create or edit the Markdown, index entry, and companion JSON as `draft` + `awaiting_verification`.
+2. Record each source and its true category. Do not invent missing dates.
+3. Review the fact, source currency, wording, and conflicts.
+4. Set the record to `sourced` or `verified`; record `lastVerifiedAt` only after an actual check.
+5. Add/update the internal content register and revision entry.
+6. Change the companion and index entry to `published` in the same reviewed change.
+7. Run `npm run content:audit`, tests, lint, and build.
 
-## Pending information
+Mark uncertain current information `outdated`, or move it to `draft`/`archived` when it should no longer be public. Prefer archival to destructive deletion when the record has civic or review value.
 
-Pending facts stay out of visible prose. A category may remain visible with the standard pending-verification message. Companion metadata may use `"status": "pending"`, but an index entry must not be marked published until it contains useful, sourced public information.
+## Reverification
 
-## Review cadence
-
-- Emergency contacts, elected officials, office contacts, fees, schedules, and procedures: review at least every three months and after a known change.
-- Budgets, audit reports, procurement records, and annual statistics: review when the issuing organization publishes a new cycle.
-- Administrative identity and barangay lists: review at least annually against the latest PSGC release.
-- Every other published municipal page: review at least every six months.
-
-## Political and elected-official content
-
-Use factual names, official titles, and explicit effective dates only. Do not add praise, criticism, campaign material, inferred affiliation, motives, rankings, biographies, or policy characterization unless it is necessary, directly supported, and neutrally stated. Verify current officeholders from an authoritative current record.
-
-## Emergency information
-
-An emergency number or response instruction requires a current official source, a verification date, and preferably a second authoritative confirmation. Never infer a number from another municipality or from an unverified directory. Remove or unpublish a contact immediately if its validity is uncertain.
+`CONTENT_REVERIFY_MONTHS` controls the repository audit interval; `VITE_CONTENT_REVERIFY_MONTHS` makes the same interval available to the frontend. The default is 12 months. The audit warns rather than deletes when a record is due. High-risk contacts, fees, schedules, procedures, emergency information, and current officials should be reviewed more often.
 
 ## Corrections
 
-Contributors should submit a repository issue or pull request containing the disputed statement, authoritative replacement source, source organization, URL, effective date if available, and date checked. Do not include private personal information. A correction follows the same review and test process as new content.
+Public pages link to a correction form that validates lengths and HTTP(S) source URLs, uses a honeypot field, collects no name or email, and prepares a GitHub issue. GitHub provides authentication and abuse controls. Maintainers should apply `new`, `reviewing`, `resolved`, or `rejected` labels. Reporter information is never rendered by Better Gattaran.
+
+## Security boundary
+
+There is no admin endpoint or client-authorized verification action. Only reviewed repository changes can alter lifecycle metadata. Do not add secrets, tokens, private notes, or personal data to the repository. Search indexing uses the same public-visibility policy as page listings and direct routes.

@@ -1,4 +1,5 @@
 import { Meilisearch } from 'meilisearch';
+import type { VerificationStatus } from './contentGovernance';
 
 export const isMeilisearchEnabled = Boolean(
   import.meta.env.VITE_MEILISEARCH_HOST
@@ -22,4 +23,5 @@ export interface SearchHit {
   categorySlug: string;
   slug: string;
   url: string;
+  verificationStatus: VerificationStatus;
 }

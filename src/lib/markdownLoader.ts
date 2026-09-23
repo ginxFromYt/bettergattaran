@@ -1,6 +1,21 @@
-/**
- * Utility to load markdown content dynamically based on slug
- */
+/** Utility to load repository-managed Markdown content by slug. */
+
+import {
+  PUBLICATION_STATUSES,
+  SOURCE_TYPES,
+  VERIFICATION_STATUSES,
+  isSafeHttpUrl,
+  type ContentProvenance,
+  type PublicationStatus,
+  type SourceReference,
+} from './contentGovernance';
+
+export type {
+  ContentProvenance,
+  PublicationStatus,
+  SourceReference,
+  VerificationStatus,
+} from './contentGovernance';
 
 /**
  * Replaces {PLACEHOLDER} tokens using JSON data first, then VITE_ env vars.
@@ -22,22 +37,7 @@ export interface MarkdownContent {
   description?: string;
   data?: Record<string, unknown>;
   provenance?: ContentProvenance;
-}
-
-export type VerificationStatus = 'verified' | 'pending';
-
-export interface SourceReference {
-  title: string;
-  organization: string;
-  url: string;
-  asOf?: string;
-}
-
-export interface ContentProvenance {
-  status: VerificationStatus;
-  verifiedAt?: string;
-  asOf?: string;
-  sources: SourceReference[];
+  publicationStatus: PublicationStatus;
 }
 
 function isDate(value: unknown): value is string {
@@ -48,7 +48,17 @@ function parseProvenance(value: unknown): ContentProvenance | undefined {
   if (!value || typeof value !== 'object') return undefined;
 
   const candidate = value as Record<string, unknown>;
-  if (candidate.status !== 'verified' && candidate.status !== 'pending') {
+  const legacyStatus =
+    candidate.status === 'pending' ? 'awaiting_verification' : candidate.status;
+  const verificationStatus =
+    typeof candidate.verificationStatus === 'string'
+      ? candidate.verificationStatus
+      : legacyStatus;
+  if (
+    !VERIFICATION_STATUSES.includes(
+      verificationStatus as (typeof VERIFICATION_STATUSES)[number]
+    )
+  ) {
     return undefined;
   }
 
@@ -60,7 +70,7 @@ function parseProvenance(value: unknown): ContentProvenance | undefined {
           typeof entry.title !== 'string' ||
           typeof entry.organization !== 'string' ||
           typeof entry.url !== 'string' ||
-          !/^https?:\/\//.test(entry.url)
+          !isSafeHttpUrl(entry.url)
         ) {
           return [];
         }
@@ -70,6 +80,14 @@ function parseProvenance(value: unknown): ContentProvenance | undefined {
             title: entry.title,
             organization: entry.organization,
             url: entry.url,
+            type: SOURCE_TYPES.includes(
+              entry.type as (typeof SOURCE_TYPES)[number]
+            )
+              ? (entry.type as SourceReference['type'])
+              : 'other_public_source',
+            ...(isDate(entry.publishedAt)
+              ? { publishedAt: entry.publishedAt }
+              : {}),
             ...(isDate(entry.asOf) ? { asOf: entry.asOf } : {}),
           },
         ];
@@ -77,13 +95,26 @@ function parseProvenance(value: unknown): ContentProvenance | undefined {
     : [];
 
   return {
-    status: candidate.status,
-    ...(isDate(candidate.verifiedAt)
-      ? { verifiedAt: candidate.verifiedAt }
+    verificationStatus:
+      verificationStatus as ContentProvenance['verificationStatus'],
+    ...(isDate(candidate.lastVerifiedAt)
+      ? { lastVerifiedAt: candidate.lastVerifiedAt }
+      : isDate(candidate.verifiedAt)
+        ? { lastVerifiedAt: candidate.verifiedAt }
+        : {}),
+    ...(isDate(candidate.lastUpdatedAt)
+      ? { lastUpdatedAt: candidate.lastUpdatedAt }
       : {}),
     ...(isDate(candidate.asOf) ? { asOf: candidate.asOf } : {}),
     sources,
   };
+}
+
+function parsePublicationStatus(value: unknown): PublicationStatus {
+  if (PUBLICATION_STATUSES.includes(value as PublicationStatus)) {
+    return value as PublicationStatus;
+  }
+  return 'draft';
 }
 
 /**
@@ -132,6 +163,7 @@ export async function loadMarkdownContent(
       description,
       data,
       provenance: parseProvenance(data.provenance),
+      publicationStatus: parsePublicationStatus(data.publicationStatus),
     };
   } catch (error) {
     console.error(

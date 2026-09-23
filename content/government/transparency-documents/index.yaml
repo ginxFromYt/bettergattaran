@@ -4,5 +4,6 @@ layout: grid
 pages:
   - name: 'Authoritative record repositories'
     slug: 'authoritative-record-repositories'
-    published: true
+    publicationStatus: published
+    verificationStatus: verified
     description: 'Official starting points for geographic data and Commission on Audit reports.'

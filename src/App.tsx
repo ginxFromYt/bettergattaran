@@ -12,6 +12,10 @@ const Services = lazy(() => import('./pages/Services'));
 const Document = lazy(() => import('./pages/Document'));
 const Government = lazy(() => import('./pages/Government'));
 const Search = lazy(() => import('./pages/Search'));
+const About = lazy(() => import('./pages/About'));
+const ReportIncorrectInformation = lazy(
+  () => import('./pages/ReportIncorrectInformation')
+);
 
 function App() {
   return (
@@ -28,6 +32,11 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route
+                  path="/report-incorrect-information"
+                  element={<ReportIncorrectInformation />}
+                />
                 <Route path="/services/:category" element={<Services />} />
                 <Route path="/services" element={<Services />} />
                 <Route
