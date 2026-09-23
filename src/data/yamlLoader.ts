@@ -1,4 +1,10 @@
 import * as yaml from 'js-yaml';
+import {
+  isPubliclyVisible,
+  type PublicationStatus,
+  type VerificationStatus,
+} from '../lib/contentGovernance';
+import { contentGovernanceConfig } from '../config/contentGovernance';
 
 // Type definitions for the services data
 export interface Subcategory {
@@ -6,6 +12,8 @@ export interface Subcategory {
   slug: string;
   description?: string;
   published?: boolean;
+  publicationStatus?: PublicationStatus;
+  verificationStatus?: VerificationStatus;
 }
 
 export interface Category {
@@ -96,7 +104,18 @@ export async function loadCategoryIndex(
       title: indexData.title,
       description: indexData.description,
       layout: indexData.layout ?? 'list',
-      pages: (indexData.pages || []).filter(page => page.published === true),
+      pages: (indexData.pages || []).filter(page => {
+        const publicationStatus =
+          page.publicationStatus ?? (page.published ? 'published' : 'draft');
+        const verificationStatus =
+          page.verificationStatus ??
+          (page.published ? 'verified' : 'awaiting_verification');
+        return isPubliclyVisible(
+          publicationStatus,
+          verificationStatus,
+          contentGovernanceConfig.allowSourcedContent
+        );
+      }),
     };
   } catch (parseError) {
     console.warn(

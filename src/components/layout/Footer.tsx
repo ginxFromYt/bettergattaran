@@ -29,6 +29,10 @@ const Footer: React.FC = () => {
               </div>
             </div>
             <p className="text-gray-400 text-sm mb-4">{t('footer.status')}</p>
+            <p className="text-gray-400 text-xs">
+              Sources are shown where available. External links do not imply
+              endorsement.
+            </p>
           </div>
 
           {footerNavigation.mainSections.map(section => (

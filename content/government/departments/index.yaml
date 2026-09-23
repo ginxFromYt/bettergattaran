@@ -5,13 +5,16 @@ layout: grid
 pages:
   - name: 'Municipality overview'
     slug: 'municipality-overview'
-    published: true
+    publicationStatus: published
+    verificationStatus: verified
     description: 'Administrative identity, PSGC codes, income classification, population context, and barangay count.'
   - name: 'Barangays'
     slug: 'barangays'
-    published: true
+    publicationStatus: published
+    verificationStatus: verified
     description: 'The official Philippine Statistics Authority list of Gattaran barangays.'
   - name: 'Municipal mayor'
     slug: 'municipal-mayor'
-    published: true
+    publicationStatus: published
+    verificationStatus: verified
     description: 'The current municipal mayor listed by the Provincial Government of Cagayan.'

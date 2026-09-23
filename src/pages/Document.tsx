@@ -25,6 +25,9 @@ import {
 import SEO from '../components/SEO';
 import { sanitizeLegacyServiceContent } from '../lib/legacyContent';
 import ContentProvenance from '../components/content/ContentProvenance';
+import ReportCorrectionLink from '../components/content/ReportCorrectionLink';
+import { isPubliclyVisible } from '../lib/contentGovernance';
+import { contentGovernanceConfig } from '../config/contentGovernance';
 
 interface DocumentProps {
   theme?: string;
@@ -219,6 +222,35 @@ export default function Document({
     return null;
   }
 
+  const isVisible =
+    markdownContent.provenance &&
+    isPubliclyVisible(
+      markdownContent.publicationStatus,
+      markdownContent.provenance.verificationStatus,
+      contentGovernanceConfig.allowSourcedContent
+    );
+
+  if (!isVisible) {
+    return (
+      <>
+        <SEO
+          title="Information awaiting verification"
+          description="This record is not currently available as published public information."
+        />
+        <Section className="p-3 mb-12">
+          <Breadcrumbs className="mb-8" items={breadcrumbs} />
+          <Banner
+            type="info"
+            title="Information awaiting verification"
+            description="No verified information is currently available for this page. It will be published after reliable sources and its review status are recorded."
+            icon
+          />
+          <ReportCorrectionLink />
+        </Section>
+      </>
+    );
+  }
+
   return (
     <>
       <SEO
@@ -232,7 +264,7 @@ export default function Document({
       <Section className="p-3 mb-12">
         <Breadcrumbs className="mb-8" items={breadcrumbs} />
         {categoryType === 'service' &&
-          markdownContent.provenance?.status !== 'verified' && (
+          markdownContent.provenance?.verificationStatus !== 'verified' && (
             <Banner
               type="info"
               title="Verification notice"
@@ -252,6 +284,7 @@ export default function Document({
               {markdownContent.content}
             </ReactMarkdown>
             <ContentProvenance provenance={markdownContent.provenance} />
+            <ReportCorrectionLink />
           </CardHeader>
         </Card>
       </Section>

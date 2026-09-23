@@ -1,47 +1,50 @@
-# Phase 2 content inventory
+# Phase 3 content inventory
 
-Inventory date: 2026-09-22
+Inventory date: 2026-09-23
 
-## Current content model
+## A. Supported by authoritative sources
 
-- Top-level service and government categories are defined in `src/data/*.yaml`.
-- Each registered category reads a `content/**/index.yaml` file.
-- Markdown pages may have a same-name JSON companion. The loader currently treats that JSON as untyped placeholder data; it has no defined source, verification-date, effective-date, or status fields.
-- Government and service document routes already support new Markdown pages without a new page component. A category must be registered in `src/data/yamlLoader.ts`.
-- The government category list contains several visible categories with no registered or populated index. Their category pages therefore show no records and no explicit empty state.
-- The service indexes advertise many procedures for which no Gattaran-specific Markdown exists. Existing descriptions must not be treated as proof that the municipality offers those services in the described form.
+- Municipality overview: Philippine Statistics Authority PSGC records.
+- Barangay list and population context: Philippine Statistics Authority PSGC records.
+- Municipal mayor: current Provincial Government of Cagayan directory.
+- Authoritative record repositories: Commission on Audit and PSA entry points. The portal does not summarize unverified financial figures.
 
-## Visible placeholders and pending areas
+These four records are `published` + `verified`, have public provenance companions, internal governance-register entries, and visible verification dates.
 
-- Municipal office structure, office heads, locations, contacts, and hours
-- Vice mayor and Sangguniang Bayan membership
-- Emergency and public-safety contacts
-- Local ordinances, resolutions, consultations, notices, projects, budgets, procurement records, and service procedures
-- Gattaran-specific requirements, fees, processing times, schedules, and eligibility rules
-- A source inventory and visible provenance information
+## B. Has a source but requires review
 
-The empty `content/services/business/rent-stalls-in-public-markets.md` file is indexed but contains no publishable information.
+No public record is currently classified `sourced`. The model supports it, and deployment can disable all sourced content with configuration.
 
-## Inherited locality-specific files
+## C. No reliable source currently stored
 
-These 15 Markdown files contain Lapu-Lapu or Cebu-specific material and remain subject to runtime suppression:
+- Municipal office structure, office heads, locations, contacts, and hours.
+- Vice mayor and Sangguniang Bayan membership.
+- Emergency and public-safety contacts.
+- Local ordinances, resolutions, consultations, notices, projects, budgets, procurement records, and service procedures.
+- Gattaran-specific requirements, fees, processing times, schedules, and eligibility rules.
 
-- `business/apply-for-barangay-clearance-and-mayors-business-permits.md`
-- `business/join-trade-fairs-business-expos-or-tourism-promotions.md`
-- `business/renew-permits-and-pay-local-business-taxes.md`
-- `education/access-educational-support-programs-from-the-lgu.md`
-- `education/apply-for-local-scholarships.md`
-- `education/enroll-children-in-lgu-daycare-or-preschool-programs.md`
-- `education/learn-about-supplementary-activities-for-schools-in-your-area.md`
-- `garbage-waste-disposal/check-garbage-collection-schedules-and-request-pickup.md`
-- `garbage-waste-disposal/learn-proper-waste-segregation-and-disposal-methods.md`
-- `garbage-waste-disposal/report-illegal-dumping-or-waste-management-violations.md`
-- `garbage-waste-disposal/request-special-waste-collection-hazardous-materials-electronics.md`
-- `health-services/access-maternal-care-and-child-immunization.md`
-- `health-services/get-free-check-ups-basic-medicines-and-vaccines.md`
-- `health-services/go-to-the-local-hospital-for-treatment-or-confinement.md`
-- `health-services/join-health-programs-nutrition-dengue-control-tb-treatment.md`
+These areas remain empty or draft and render intentional awaiting-verification states.
 
-## Phase 2 implementation boundary
+## D. Potentially outdated
 
-The authoritative sources located in this pass support a municipality profile, the current PSGC barangay list and population context, one current elected-official fact, and links to official public-record repositories. They do not support local service procedures, emergency contacts, a complete office directory, or other officials. Those areas remain unpublished or explicitly pending.
+- A Provincial Government of Cagayan article from 13 February 2024 names a prior mayor. It is documented in `docs/sources.md` but is not used for the current official.
+- Published records will be flagged by `npm run content:audit` after the configured reverification interval; none is automatically deleted.
+
+## E. Placeholder or inherited demo content
+
+Fifteen Markdown service files contain Lapu-Lapu/Cebu starter content. Other service index entries describe generic hypothetical services for which no Markdown or Gattaran source exists. The empty public-market-stall file has no publishable content.
+
+All are treated as drafts. They are excluded from listings, search indexing, and direct document rendering. They remain in the repository for upstream traceability and possible future replacement, not as claims about Gattaran.
+
+## Architecture findings
+
+- Content is file-backed; there is no database or API.
+- YAML indexes drive category listings; Markdown provides prose; companion JSON provides interpolation and public provenance.
+- `src/lib/contentGovernance.ts` owns controlled statuses, source types, visibility logic, URL safety, and staleness logic.
+- `governance/content-register.json` stores reviewer ownership and internal review notes outside the frontend bundle.
+- `governance/revisions.json` and Git history provide the lightweight audit trail.
+- There is no authentication, role model, admin dashboard, or safe server-side admin action to extend. Governance is enforced through repository review and `npm run content:audit`.
+
+## Intentional handling
+
+Nothing in categories C–E was deleted or presented as verified. Records should remain draft until an authoritative source exists, become `outdated` only when historical public context is useful, or become `archived` when they should be retained but no longer exposed.

@@ -66,14 +66,6 @@ const Navbar: React.FC = () => {
               Official Gov.ph
             </a>
 
-            <a
-              href="https://bettergov.ph/philippines/hotlines"
-              className="text-xs text-gray-800 hover:text-primary-600 transition-colors"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Hotlines
-            </a>
             <div className="hidden md:block">
               <select
                 value={i18n.language}

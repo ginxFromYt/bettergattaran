@@ -1,5 +1,7 @@
 # 📝 Content Writing Guide for Local Government Websites
 
+> **Better Gattaran governance rule:** This portal is independent and is not the Municipality's official website. Templates below are structural examples only. Never fill them with guessed names, contacts, fees, schedules, requirements, procedures, or programs. New pages start as `draft` + `awaiting_verification`; follow [`docs/content-verification.md`](docs/content-verification.md) before publication.
+
 This guide helps content contributors create clear, helpful, and accessible content for local government websites.
 
 ## 🎯 Content Principles
@@ -303,9 +305,9 @@ When officials change, **only update the JSON file** — no need to touch the ma
 
 ## Source and verification metadata
 
-Municipality-specific facts must follow [`docs/content-verification.md`](docs/content-verification.md). A page is shown in category listings only when its `index.yaml` entry contains `published: true`. Add that flag only after review.
+Municipality-specific facts must follow [`docs/content-verification.md`](docs/content-verification.md). A page is shown only when both its index entry and companion JSON are `published` with an eligible verification state. Direct URLs and search use the same rule.
 
-Use the page's companion JSON file to record `provenance.status`, `verifiedAt`, optional `asOf`, and one or more source entries. Each source requires a title, issuing organization, and authoritative HTTP(S) URL. The site renders this information at the end of the page.
+Use the page's companion JSON file to record `publicationStatus`, `provenance.verificationStatus`, `lastUpdatedAt`, `lastVerifiedAt` when genuinely checked, optional `asOf`, and one or more source entries. Each source requires a title, issuing organization, controlled source type, and HTTP(S) URL. The site renders public provenance at the end of the page; internal review data stays in `governance/`.
 
 Do not publish guessed officials, contacts, fees, requirements, schedules, emergency numbers, or procedures. General national guidance must not be described as a Gattaran procedure.
 

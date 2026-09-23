@@ -80,14 +80,11 @@ describe('Better Gattaran baseline', () => {
     );
 
     expect(
-      await screen.findByRole('heading', {
-        name: 'Service guide pending verification',
-      })
+      await screen.findByText('Information awaiting verification')
     ).toBeInTheDocument();
-    expect(screen.getByText('Verification notice')).toBeInTheDocument();
     expect(document.body).not.toHaveTextContent(/Lapu[\s-]?Lapu/i);
     expect(
-      screen.getByText('Information pending verification')
+      screen.getByText(/No verified information is currently available/)
     ).toBeInTheDocument();
   });
 
@@ -105,7 +102,9 @@ describe('Better Gattaran baseline', () => {
     expect(screen.getByText('Verified public information')).toBeInTheDocument();
     expect(screen.getByText('Last verified:')).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: 'Municipality of Gattaran' })
+      screen.getByRole('link', {
+        name: /Municipality of Gattaran.*opens in a new tab/,
+      })
     ).toHaveAttribute(
       'href',
       'https://psa.gov.ph/classification/psgc/barangays/0201513000'

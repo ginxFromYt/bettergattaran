@@ -6,16 +6,25 @@ describe('sanitizeLegacyServiceContent', () => {
     const result = sanitizeLegacyServiceContent({
       title: 'Legacy health guide',
       content: '# Lapu-Lapu City Health Services\n\nLegacy local details.',
+      publicationStatus: 'draft',
     });
 
     expect(result.title).toBe('Service guide pending verification');
     expect(result.content).toContain('refers to another locality');
     expect(result.content).not.toMatch(/Lapu[\s-]?Lapu/i);
-    expect(result.provenance).toEqual({ status: 'pending', sources: [] });
+    expect(result.provenance).toEqual({
+      verificationStatus: 'awaiting_verification',
+      sources: [],
+    });
+    expect(result.publicationStatus).toBe('draft');
   });
 
   it('leaves non-legacy content unchanged', () => {
-    const content = { title: 'General guide', content: '# General guidance' };
+    const content = {
+      title: 'General guide',
+      content: '# General guidance',
+      publicationStatus: 'published' as const,
+    };
 
     expect(sanitizeLegacyServiceContent(content)).toBe(content);
   });
