@@ -8,8 +8,9 @@ Inventory date: 2026-09-23
 - Barangay list and population context: Philippine Statistics Authority PSGC records.
 - Municipal mayor: current Provincial Government of Cagayan directory.
 - Authoritative record repositories: Commission on Audit and PSA entry points. The portal does not summarize unverified financial figures.
+- National Emergency Hotline, Gattaran Emergency Hospital, and Cagayan PDRRMO contact records: official Philippine and Provincial Government sources.
 
-These four records are `published` + `verified`, have public provenance companions, internal governance-register entries, and visible verification dates.
+These seven records are `published` + `verified`, have public provenance companions, internal governance-register entries, and visible verification dates.
 
 ## B. Has a source but requires review
 
@@ -19,7 +20,7 @@ No public record is currently classified `sourced`. The model supports it, and d
 
 - Municipal office structure, office heads, locations, contacts, and hours.
 - Vice mayor and Sangguniang Bayan membership.
-- Emergency and public-safety contacts.
+- Other emergency and public-safety contacts, including Gattaran MDRRMO, police, and fire contacts.
 - Local ordinances, resolutions, consultations, notices, projects, budgets, procurement records, and service procedures.
 - Gattaran-specific requirements, fees, processing times, schedules, and eligibility rules.
 

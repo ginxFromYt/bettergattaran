@@ -18,7 +18,7 @@ export interface SearchHit {
   id: string;
   title: string;
   description: string;
-  type: 'service' | 'government';
+  type: 'service' | 'government' | 'hotline';
   category: string;
   categorySlug: string;
   slug: string;

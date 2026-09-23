@@ -12,7 +12,7 @@
  */
 
 import { Meilisearch } from 'meilisearch';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import * as yaml from 'js-yaml';
@@ -118,6 +118,45 @@ function loadMarkdownPages(dir, categorySlug, categoryName, type) {
   return documents;
 }
 
+function loadHotlines() {
+  const directory = join(ROOT, 'content/hotlines');
+  const allowSourced = process.env.ALLOW_SOURCED_CONTENT !== 'false';
+
+  return readdirSync(directory)
+    .filter(file => file.endsWith('.json'))
+    .flatMap(file => {
+      try {
+        const record = JSON.parse(readFileSync(join(directory, file), 'utf8'));
+        const status = record.provenance?.verificationStatus;
+        const eligible =
+          record.publicationStatus === 'published' &&
+          record.provenance?.sources?.length > 0 &&
+          (status === 'verified' ||
+            status === 'outdated' ||
+            (allowSourced && status === 'sourced'));
+        if (!eligible || !/^\+?\d{3,15}$/.test(record.phone)) return [];
+
+        const slug = file.replace(/\.json$/, '');
+        return [
+          {
+            id: `hotline-${slug}`,
+            title: record.name,
+            description: `Verified emergency contact: ${record.displayPhone}`,
+            content: `${record.name} ${record.displayPhone}`,
+            type: 'hotline',
+            category: 'Emergency hotlines',
+            categorySlug: 'hotlines',
+            slug,
+            url: `/hotlines#${slug}`,
+            verificationStatus: status,
+          },
+        ];
+      } catch {
+        return [];
+      }
+    });
+}
+
 async function indexContent() {
   const documents = [];
 
@@ -154,6 +193,8 @@ async function indexContent() {
       }
     }
   }
+
+  documents.push(...loadHotlines());
 
   if (documents.length === 0) {
     console.warn('No documents found to index. Check content/ directory.');

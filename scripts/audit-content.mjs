@@ -110,6 +110,19 @@ for (const file of files.filter(file => file.endsWith('.json'))) {
         `${relative(file)}: internal governance record is incomplete`
       );
     }
+    if (contentId.startsWith(`hotlines${path.sep}`)) {
+      if (!record.name || !record.displayPhone) {
+        errors.push(`${relative(file)}: hotline needs a name and displayPhone`);
+      }
+      if (
+        typeof record.phone !== 'string' ||
+        !/^\+?\d{3,15}$/.test(record.phone)
+      ) {
+        errors.push(
+          `${relative(file)}: hotline needs a normalized phone value`
+        );
+      }
+    }
   }
 
   const provenance = record.provenance;
