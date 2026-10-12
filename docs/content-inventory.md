@@ -22,6 +22,8 @@ Phase 4 adds `sourced` records that an agent checked against official government
 
 Drafts awaiting a source: elected officials (Vice Mayor and Sangguniang Bayan).
 
+Unfiled draft information requests (`content/request-drafts/`): DILG (Full Disclosure Policy documents), BLGF (Statements of Receipts and Expenditures), COA (audit reports not online) and the Municipality of Gattaran (Citizen's Charter and office directory).
+
 ## C. No reliable source currently stored
 
 - Municipal office structure, office heads, locations, contacts, and hours.

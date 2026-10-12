@@ -80,3 +80,52 @@ export function validateProject(record) {
   }
   return errors;
 }
+
+const foiChannels = ['efoi', 'letter', 'email'];
+const foiStatuses = [
+  'pending',
+  'acknowledged',
+  'granted',
+  'partially_granted',
+  'denied',
+  'no_response',
+];
+const isoDate = value =>
+  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+
+/** Returns error messages for a content/requests/** record. */
+export function validateRequest(record) {
+  const errors = [];
+  const request = record.request;
+  if (!request || typeof request !== 'object') {
+    return ['request record needs a "request" object'];
+  }
+  for (const field of ['agency', 'subject']) {
+    if (!nonEmpty(request[field])) errors.push(`request.${field} is required`);
+  }
+  if (!foiChannels.includes(request.channel)) {
+    errors.push(`request.channel must be one of ${foiChannels.join(', ')}`);
+  }
+  if (!foiStatuses.includes(request.status)) {
+    errors.push(`request.status must be one of ${foiStatuses.join(', ')}`);
+  }
+  if (record.publicationStatus === 'published' && !isoDate(request.dateSent)) {
+    errors.push('published requests need request.dateSent (YYYY-MM-DD)');
+  }
+  if (request.dateSent !== undefined && !isoDate(request.dateSent)) {
+    errors.push('request.dateSent must be YYYY-MM-DD');
+  }
+  if (request.responseDate !== undefined && !isoDate(request.responseDate)) {
+    errors.push('request.responseDate must be YYYY-MM-DD');
+  }
+  if (
+    request.publicRequestUrl !== undefined &&
+    !/^https?:\/\//.test(request.publicRequestUrl)
+  ) {
+    errors.push('request.publicRequestUrl must be an http(s) URL');
+  }
+  if (record.publicationStatus !== 'published' && request.dateSent) {
+    errors.push('unpublished seed requests must not carry a sent date');
+  }
+  return errors;
+}

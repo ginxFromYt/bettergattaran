@@ -2,6 +2,7 @@ import React from 'react';
 import { footerNavigation } from '../../data/navigation';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import LastUpdated from './LastUpdated';
 
 const Footer: React.FC = () => {
   const { t } = useTranslation('common');
@@ -33,6 +34,7 @@ const Footer: React.FC = () => {
               Sources are shown where available. External links do not imply
               endorsement.
             </p>
+            <LastUpdated />
           </div>
 
           {footerNavigation.mainSections.map(section => (

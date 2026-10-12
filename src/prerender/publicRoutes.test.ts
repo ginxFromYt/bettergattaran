@@ -73,6 +73,7 @@ function fixture(
     },
     hotlines: [],
     projects: [],
+    foiRequests: [],
     allowSourced,
   };
 }

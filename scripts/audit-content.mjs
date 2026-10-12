@@ -5,6 +5,7 @@ import * as yaml from 'js-yaml';
 import {
   validateLocators,
   validateProject,
+  validateRequest,
   validateScope,
 } from './audit-rules.mjs';
 
@@ -133,17 +134,22 @@ for (const file of files.filter(file => file.endsWith('.json'))) {
   const isProject = path
     .relative(contentRoot, file)
     .startsWith(`projects${path.sep}`);
+  const relativeToContent = path.relative(contentRoot, file);
+  const isRequest =
+    relativeToContent.startsWith(`requests${path.sep}`) ||
+    relativeToContent.startsWith(`request-drafts${path.sep}`);
   for (const message of [
     ...validateScope(record),
     ...validateLocators(record),
     ...(isProject ? validateProject(record) : []),
+    ...(isRequest ? validateRequest(record) : []),
   ]) {
     errors.push(`${relative(file)}: ${message}`);
   }
 
   const provenance = record.provenance;
   if (!provenance) {
-    if (publicationStatus === 'published') {
+    if (publicationStatus === 'published' && !isRequest) {
       errors.push(`${relative(file)}: published content requires provenance`);
     }
     continue;

@@ -8,6 +8,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ContentProvenance from '../components/content/ContentProvenance';
+import FoiRequestsList from '../components/content/FoiRequestsList';
+import WhatsNewList from '../components/content/WhatsNewList';
 import ProjectsTable from '../components/content/ProjectsTable';
 import NationalScopeNotice from '../components/content/NationalScopeNotice';
 import { createMarkdownComponents } from '../lib/markdownComponents';
@@ -17,6 +19,9 @@ import { contentGovernanceConfig } from '../config/contentGovernance';
 import { publicHotlines } from '../lib/hotlines';
 import { publicProjects } from '../lib/projects';
 import { PROJECTS_STATEMENT } from '../lib/projectsCopy';
+import { publicFoiRequests } from '../lib/foiRequests';
+import { FOI_STATEMENT } from '../lib/foiCopy';
+import { WHATS_NEW_DESCRIPTION, type WhatsNewData } from '../lib/whatsNew';
 import { serviceCategories, governmentCategories } from '../data/yamlLoader';
 import common from '../../public/locales/en/common.json';
 import type { HotlineRecord } from '../lib/hotlines';
@@ -61,7 +66,24 @@ const navigation = [
   { label: 'About & verification', href: '/about' },
 ];
 
-function Shell({ children }: { children: React.ReactNode }) {
+export interface RenderContext {
+  whatsNew?: WhatsNewData;
+}
+
+function formatDate(value: string): string {
+  return new Intl.DateTimeFormat('en-PH', {
+    dateStyle: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(`${value}T00:00:00Z`));
+}
+
+function Shell({
+  children,
+  lastUpdated,
+}: {
+  children: React.ReactNode;
+  lastUpdated?: string;
+}) {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-gray-200 bg-white">
@@ -87,6 +109,12 @@ function Shell({ children }: { children: React.ReactNode }) {
             Sources are shown where available. External links do not imply
             endorsement.
           </p>
+          {lastUpdated && (
+            <p className="mt-2 text-xs text-gray-400">
+              Content last updated:{' '}
+              <time dateTime={lastUpdated}>{formatDate(lastUpdated)}</time>
+            </p>
+          )}
         </div>
       </footer>
     </div>
@@ -138,7 +166,13 @@ function Hotline({ hotline }: { hotline: HotlineRecord }) {
   );
 }
 
-function Body({ route }: { route: PublicRoute }) {
+function Body({
+  route,
+  context,
+}: {
+  route: PublicRoute;
+  context: RenderContext;
+}) {
   switch (route.kind) {
     case 'home':
       return (
@@ -165,6 +199,19 @@ function Body({ route }: { route: PublicRoute }) {
               href: `/government/${category.slug}`,
             }))}
           />
+          {context.whatsNew && context.whatsNew.entries.length > 0 && (
+            <>
+              <h2 className="mt-10 text-2xl font-semibold">What’s new</h2>
+              <div className="mt-4">
+                <WhatsNewList entries={context.whatsNew.entries.slice(0, 3)} />
+              </div>
+              <p className="mt-4">
+                <a href="/whats-new" className="text-primary-700 underline">
+                  See all recent changes
+                </a>
+              </p>
+            </>
+          )}
           <h2 className="mt-10 text-2xl font-semibold">Emergency hotlines</h2>
           <p className="mt-2 text-gray-700">
             <a href="/hotlines" className="text-primary-700 underline">
@@ -198,6 +245,29 @@ function Body({ route }: { route: PublicRoute }) {
             <ProjectsTable projects={publicProjects} />
           </div>
           <RightOfReply path={route.path} />
+        </>
+      );
+    case 'foi':
+      return (
+        <>
+          <h1 className="text-3xl font-bold">{route.title}</h1>
+          <p className="mt-3 max-w-3xl text-gray-700">{FOI_STATEMENT}</p>
+          <div className="mt-6">
+            <FoiRequestsList requests={publicFoiRequests} />
+          </div>
+        </>
+      );
+    case 'whats-new':
+      return (
+        <>
+          <h1 className="text-3xl font-bold">{route.title}</h1>
+          <p className="mt-3 max-w-3xl text-gray-700">
+            {WHATS_NEW_DESCRIPTION} Only records that are currently public are
+            listed.
+          </p>
+          <div className="mt-6">
+            <WhatsNewList entries={context.whatsNew?.entries ?? []} />
+          </div>
         </>
       );
     case 'about':
@@ -257,10 +327,13 @@ function Body({ route }: { route: PublicRoute }) {
   }
 }
 
-export function renderRouteBody(route: PublicRoute): string {
+export function renderRouteBody(
+  route: PublicRoute,
+  context: RenderContext = {}
+): string {
   return renderToStaticMarkup(
-    <Shell>
-      <Body route={route} />
+    <Shell lastUpdated={context.whatsNew?.lastUpdated}>
+      <Body route={route} context={context} />
     </Shell>
   );
 }

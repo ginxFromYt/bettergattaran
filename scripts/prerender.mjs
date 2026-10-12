@@ -33,7 +33,8 @@ try {
   const { buildPrerender } = await server.ssrLoadModule(
     '/src/prerender/index.ts'
   );
-  const { routes, pages, sitemap, robots } = await buildPrerender(template);
+  const { routes, pages, sitemap, robots, whatsNew } =
+    await buildPrerender(template);
 
   for (const page of pages) {
     for (const marker of ['<h1', 'rel="canonical"', 'property="og:image"']) {
@@ -47,6 +48,10 @@ try {
   }
   fs.writeFileSync(path.join(dist, 'sitemap.xml'), sitemap);
   fs.writeFileSync(path.join(dist, 'robots.txt'), robots);
+  fs.writeFileSync(
+    path.join(dist, 'whats-new.json'),
+    `${JSON.stringify(whatsNew)}\n`
+  );
 
   console.log(`Pre-rendered ${pages.length} public routes:`);
   for (const route of routes) console.log(`  ${route.path}`);

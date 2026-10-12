@@ -89,6 +89,12 @@ Every source on a record with `"containsFigures": true` needs a `locator` that p
 
 Mark uncertain current information `outdated`, or move it to `draft`/`archived` when it should no longer be public. Prefer archival to destructive deletion when the record has civic or review value.
 
+## Information-request log and What's new
+
+- **Request log.** `content/requests/*.json` holds requests the maintainers have actually sent, shown on `/foi-requests`: agency or office, channel (`efoi`, `letter`, `email`), date sent, subject, status (`pending`, `acknowledged`, `granted`, `partially_granted`, `denied`, `no_response`), optional response date and public eFOI link. The requester is always "Better Gattaran maintainers". Wording is neutral. A published request needs a sent date and an internal register entry.
+- **Seed drafts.** `content/request-drafts/*.json` are unfiled drafts for maintainers to send. They carry no sent date, are not published, and live outside `content/requests/` so they are not bundled. Move a draft to `content/requests/` only after it has been sent.
+- **What's new.** The build writes `whats-new.json`, the `/whats-new` page, the homepage teaser and the footer "Content last updated" date from `governance/revisions.json`. Only revisions of records that pass the public-visibility policy appear, so changes to drafts and blocked records are never listed.
+
 ## Reverification
 
 `CONTENT_REVERIFY_MONTHS` controls the repository audit interval; `VITE_CONTENT_REVERIFY_MONTHS` makes the same interval available to the frontend. The default is 12 months. The audit warns rather than deletes when a record is due. High-risk contacts, fees, schedules, procedures, emergency information, and current officials should be reviewed more often.

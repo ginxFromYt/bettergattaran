@@ -18,6 +18,8 @@ import {
 import { isRecordPublic } from '../lib/contentGovernance';
 import { getPublicHotlines, type HotlineRecord } from '../lib/hotlines';
 import { publicProjects, type ProjectRecord } from '../lib/projects';
+import { publicFoiRequests, type FoiRequest } from '../lib/foiRequests';
+import { FOI_DESCRIPTION, FOI_TITLE } from '../lib/foiCopy';
 import { PROJECTS_DESCRIPTION, PROJECTS_TITLE } from '../lib/projectsCopy';
 import { contentGovernanceConfig } from '../config/contentGovernance';
 
@@ -26,6 +28,8 @@ export type RouteKind =
   | 'about'
   | 'hotlines'
   | 'projects'
+  | 'foi'
+  | 'whats-new'
   | 'services'
   | 'government'
   | 'category'
@@ -55,6 +59,8 @@ export interface PublicContentInput {
   hotlines: HotlineRecord[];
   /** Already filtered by the project visibility policy. */
   projects: ProjectRecord[];
+  /** Published requests only; drafts are never loaded. */
+  foiRequests: FoiRequest[];
   allowSourced: boolean;
 }
 
@@ -87,6 +93,7 @@ export async function loadDefaultInput(): Promise<PublicContentInput> {
     indexes: Object.fromEntries(entries),
     hotlines: getPublicHotlines(),
     projects: publicProjects,
+    foiRequests: publicFoiRequests,
     allowSourced: contentGovernanceConfig.allowSourcedContent,
   };
 }
@@ -260,6 +267,21 @@ export function collectPublicRoutes(input: PublicContentInput): PublicRoute[] {
                 record =>
                   record.provenance.lastUpdatedAt ??
                   record.provenance.lastVerifiedAt
+              )
+            ),
+          },
+        ]
+      : []),
+    ...(input.foiRequests.length > 0
+      ? [
+          {
+            path: '/foi-requests',
+            kind: 'foi' as const,
+            title: FOI_TITLE,
+            description: FOI_DESCRIPTION,
+            lastModified: latestDate(
+              ...input.foiRequests.map(
+                request => request.responseDate ?? request.dateSent
               )
             ),
           },

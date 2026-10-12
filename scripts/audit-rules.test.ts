@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   validateLocators,
   validateProject,
+  validateRequest,
   validateScope,
 } from './audit-rules.mjs';
 
@@ -123,5 +124,58 @@ describe('validateProject', () => {
 
   it('requires a project object', () => {
     expect(validateProject({})).toHaveLength(1);
+  });
+});
+
+describe('validateRequest', () => {
+  const draft = {
+    publicationStatus: 'draft',
+    request: {
+      agency: 'Example Agency',
+      channel: 'efoi',
+      subject: 'Example records',
+      status: 'pending',
+    },
+  };
+  const published = {
+    publicationStatus: 'published',
+    request: { ...draft.request, dateSent: '2026-11-02' },
+  };
+
+  it('accepts a seed draft and a complete published request', () => {
+    expect(validateRequest(draft)).toEqual([]);
+    expect(validateRequest(published)).toEqual([]);
+  });
+
+  it('rejects unknown channel and status values', () => {
+    const errors = validateRequest({
+      ...draft,
+      request: { ...draft.request, channel: 'fax', status: 'won' },
+    });
+    expect(errors).toHaveLength(2);
+  });
+
+  it('requires a sent date to publish but forbids one on unfiled drafts', () => {
+    expect(
+      validateRequest({ ...published, request: { ...draft.request } })
+    ).toEqual(['published requests need request.dateSent (YYYY-MM-DD)']);
+    expect(
+      validateRequest({
+        ...draft,
+        request: { ...draft.request, dateSent: '2026-11-02' },
+      })
+    ).toEqual(['unpublished seed requests must not carry a sent date']);
+  });
+
+  it('validates optional response fields', () => {
+    const errors = validateRequest({
+      ...published,
+      request: {
+        ...published.request,
+        responseDate: 'soon',
+        publicRequestUrl: 'ftp://example.test',
+      },
+    });
+    expect(errors).toHaveLength(2);
   });
 });
