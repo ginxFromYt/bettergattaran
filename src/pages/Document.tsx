@@ -27,7 +27,7 @@ import { sanitizeLegacyServiceContent } from '../lib/legacyContent';
 import ContentProvenance from '../components/content/ContentProvenance';
 import ReportCorrectionLink from '../components/content/ReportCorrectionLink';
 import NationalScopeNotice from '../components/content/NationalScopeNotice';
-import { hasNationalSource, isPubliclyVisible } from '../lib/contentGovernance';
+import { isRecordPublic } from '../lib/contentGovernance';
 import { contentGovernanceConfig } from '../config/contentGovernance';
 
 interface DocumentProps {
@@ -223,15 +223,10 @@ export default function Document({
     return null;
   }
 
-  const isNational = markdownContent.scope === 'national_applicable';
-  const isVisible =
-    markdownContent.provenance &&
-    (!isNational || hasNationalSource(markdownContent.provenance.sources)) &&
-    isPubliclyVisible(
-      markdownContent.publicationStatus,
-      markdownContent.provenance.verificationStatus,
-      contentGovernanceConfig.allowSourcedContent
-    );
+  const isVisible = isRecordPublic(
+    markdownContent,
+    contentGovernanceConfig.allowSourcedContent
+  );
 
   if (!isVisible) {
     return (
@@ -266,9 +261,11 @@ export default function Document({
       />
       <Section className="p-3 mb-12">
         <Breadcrumbs className="mb-8" items={breadcrumbs} />
-        {isNational && <NationalScopeNotice />}
+        {markdownContent.scope === 'national_applicable' && (
+          <NationalScopeNotice />
+        )}
         {categoryType === 'service' &&
-          !isNational &&
+          markdownContent.scope !== 'national_applicable' &&
           markdownContent.provenance?.verificationStatus !== 'verified' && (
             <Banner
               type="info"

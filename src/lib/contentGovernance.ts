@@ -153,3 +153,34 @@ export function sourcesMissingLocator<
 >(sources: readonly T[]): T[] {
   return sources.filter(source => !source.locator?.trim());
 }
+
+export interface PublicationCandidate {
+  publicationStatus: PublicationStatus;
+  scope?: ContentScope;
+  provenance?: {
+    verificationStatus: VerificationStatus;
+    sources: ReadonlyArray<Pick<SourceReference, 'type'>>;
+  };
+}
+
+/**
+ * The single visibility policy for a content record: used by the document
+ * viewer, the build-time pre-renderer, the sitemap, and What's new.
+ */
+export function isRecordPublic(
+  record: PublicationCandidate,
+  allowSourced = true
+): boolean {
+  if (!record.provenance) return false;
+  if (
+    record.scope === 'national_applicable' &&
+    !hasNationalSource(record.provenance.sources)
+  ) {
+    return false;
+  }
+  return isPubliclyVisible(
+    record.publicationStatus,
+    record.provenance.verificationStatus,
+    allowSourced
+  );
+}

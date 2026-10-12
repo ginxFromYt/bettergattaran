@@ -22,7 +22,7 @@ export type {
 /**
  * Replaces {PLACEHOLDER} tokens using JSON data first, then VITE_ env vars.
  */
-function interpolate(
+export function interpolate(
   content: string,
   data: Record<string, unknown> = {}
 ): string {
@@ -124,6 +124,33 @@ function parsePublicationStatus(value: unknown): PublicationStatus {
   return 'draft';
 }
 
+/** Builds page content from raw Markdown and its companion JSON data. */
+export function buildMarkdownContent(
+  raw: string,
+  data: Record<string, unknown> = {}
+): MarkdownContent {
+  const content = interpolate(raw, data);
+
+  const titleMatch = content.match(/^#\s+(.+)$/m);
+  const title = titleMatch ? titleMatch[1] : undefined;
+
+  const descriptionMatch = content.match(/^#\s+.+$\n\n(.+?)(?:\n\n|$)/s);
+  const description = descriptionMatch
+    ? descriptionMatch[1].replace(/^>\s*/, '').trim()
+    : undefined;
+
+  return {
+    content,
+    title,
+    description,
+    data,
+    provenance: parseProvenance(data.provenance),
+    publicationStatus: parsePublicationStatus(data.publicationStatus),
+    scope: parseContentScope(data.scope),
+    containsFigures: data.containsFigures === true,
+  };
+}
+
 /**
  * Loads markdown content from the appropriate content directory.
  * Also attempts to load a companion JSON file (same slug) for template
@@ -154,26 +181,7 @@ export async function loadMarkdownContent(
     const module = await import(
       `../../content/${dir}/${categorySlug}/${documentSlug}.md?raw`
     );
-    const content = interpolate(module.default, data);
-
-    const titleMatch = content.match(/^#\s+(.+)$/m);
-    const title = titleMatch ? titleMatch[1] : undefined;
-
-    const descriptionMatch = content.match(/^#\s+.+$\n\n(.+?)(?:\n\n|$)/s);
-    const description = descriptionMatch
-      ? descriptionMatch[1].replace(/^>\s*/, '').trim()
-      : undefined;
-
-    return {
-      content,
-      title,
-      description,
-      data,
-      provenance: parseProvenance(data.provenance),
-      publicationStatus: parsePublicationStatus(data.publicationStatus),
-      scope: parseContentScope(data.scope),
-      containsFigures: data.containsFigures === true,
-    };
+    return buildMarkdownContent(module.default, data);
   } catch (error) {
     console.error(
       `Failed to load markdown content for document: ${documentSlug}`,

@@ -60,7 +60,14 @@ describe('Better Gattaran baseline', () => {
     await waitFor(() => {
       expect(document.title).toBe('Home | Better Gattaran');
     });
-    expect(document.querySelector('link[rel="canonical"]')).toBeNull();
+    expect(
+      document.querySelector('link[rel="canonical"]')?.getAttribute('href')
+    ).toBe('https://bettergattaran.org/');
+    expect(
+      document
+        .querySelector('meta[property="og:image"]')
+        ?.getAttribute('content')
+    ).toBe('https://bettergattaran.org/bettergattaran.png');
   });
 
   it.each([

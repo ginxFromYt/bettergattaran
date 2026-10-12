@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { absoluteUrl, siteConfig } from '../config/site';
 
 interface SEOProps {
   title?: string;
@@ -13,14 +14,9 @@ interface SEOProps {
 function resolvePageUrl(explicitUrl?: string): string {
   if (explicitUrl) return explicitUrl;
 
-  const configuredBaseUrl = import.meta.env.VITE_WEBSITE_URL;
-  if (!configuredBaseUrl) return '';
-
+  const path = window.location.pathname.replace(/(.)\/+$/, '$1');
   try {
-    return new URL(
-      `${window.location.pathname}${window.location.search}`,
-      configuredBaseUrl
-    ).toString();
+    return absoluteUrl(path);
   } catch {
     return '';
   }
@@ -47,7 +43,10 @@ export default function SEO({
   const fullDescription = description || defaultDescription;
   const fullKeywords = keywords || defaultKeywords;
   const fullUrl = resolvePageUrl(url);
-  const fullImage = image || import.meta.env.VITE_OG_IMAGE_URL || '';
+  const fullImage =
+    image ||
+    import.meta.env.VITE_OG_IMAGE_URL ||
+    absoluteUrl(siteConfig.defaultImagePath);
   const twitterHandle = import.meta.env.VITE_TWITTER_HANDLE || '';
 
   return (
