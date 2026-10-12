@@ -2,10 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CloudSun, RefreshCw } from 'lucide-react';
 import {
   fetchCurrentWeather,
+  OPEN_METEO_SOURCE,
   type CurrentWeather,
 } from '../../services/weather';
 
 export const WEATHER_REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+const PAGASA_ADVISORIES_URL =
+  'https://pagasa.dost.gov.ph/weather/weather-advisory';
 
 interface CurrentWeatherCardProps {
   loadWeather?: typeof fetchCurrentWeather;
@@ -165,9 +168,37 @@ export default function CurrentWeatherCard({
             {weather.qualityWarning && (
               <p className="mt-2 text-warning-800">{weather.qualityWarning}</p>
             )}
+            {weather.source === OPEN_METEO_SOURCE && (
+              <p className="mt-1">
+                Weather data by{' '}
+                <a
+                  href="https://open-meteo.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  Open-Meteo.com
+                </a>{' '}
+                (CC BY 4.0).
+              </p>
+            )}
           </div>
         </div>
       )}
+
+      <p className="mt-5 border-t border-gray-200 pt-4 text-sm text-gray-700">
+        This reading is not an official weather warning. For official
+        advisories, see{' '}
+        <a
+          href={PAGASA_ADVISORIES_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-primary-700 underline underline-offset-2 hover:text-primary-900"
+        >
+          PAGASA weather advisories
+        </a>
+        .
+      </p>
 
       <button
         type="button"

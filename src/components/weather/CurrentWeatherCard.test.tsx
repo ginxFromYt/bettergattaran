@@ -59,6 +59,55 @@ describe('CurrentWeatherCard', () => {
     expect(screen.queryByText('0.0 mm')).not.toBeInTheDocument();
   });
 
+  it('always links to official PAGASA advisories and says the reading is not a warning', async () => {
+    const loadWeather = vi.fn().mockResolvedValue(weather);
+    render(<CurrentWeatherCard loadWeather={loadWeather} />);
+
+    // Present before any reading arrives, and after.
+    const link = screen.getByRole('link', {
+      name: 'PAGASA weather advisories',
+    });
+    expect(link).toHaveAttribute(
+      'href',
+      'https://pagasa.dost.gov.ph/weather/weather-advisory'
+    );
+    expect(
+      screen.getByText(/not an official weather warning/)
+    ).toBeInTheDocument();
+    await screen.findByText('PAGASA PANaHON');
+    expect(
+      screen.getByRole('link', { name: 'PAGASA weather advisories' })
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the PAGASA link when weather is unavailable', async () => {
+    const loadWeather = vi.fn().mockRejectedValue(new Error('offline'));
+    render(<CurrentWeatherCard loadWeather={loadWeather} />);
+
+    await screen.findByText('Current weather is temporarily unavailable.');
+    expect(
+      screen.getByRole('link', { name: 'PAGASA weather advisories' })
+    ).toBeInTheDocument();
+  });
+
+  it('credits Open-Meteo only when it is the provider', async () => {
+    const loadWeather = vi
+      .fn()
+      .mockResolvedValueOnce({ ...weather, source: 'Open-Meteo' })
+      .mockResolvedValueOnce(weather);
+    render(<CurrentWeatherCard loadWeather={loadWeather} />);
+
+    expect(
+      await screen.findByRole('link', { name: 'Open-Meteo.com' })
+    ).toHaveAttribute('href', 'https://open-meteo.com/');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh weather' }));
+    await screen.findByText('PAGASA PANaHON');
+    expect(
+      screen.queryByRole('link', { name: 'Open-Meteo.com' })
+    ).not.toBeInTheDocument();
+  });
+
   it('fails without breaking the surrounding page', async () => {
     const loadWeather = vi.fn().mockRejectedValue(new Error('offline'));
     render(<CurrentWeatherCard loadWeather={loadWeather} />);

@@ -33,7 +33,7 @@ This inventory records sources considered during Phases 2–3.1. Inclusion here 
 ## Live weather
 
 - **CIS Mock Backend current-weather endpoint.** Runtime observation source queried using the fixed Gattaran coordinates (`18.054287, 121.970096`); the API currently supplies qualified Gattaran location data, observation time, provider attribution, normalized metrics, nearest-station context, and quality warnings. The frontend always displays the provider returned by the response. <https://cis-mock.ginxproduction.com/api/weather/current?latitude=18.0542870&longitude=121.9700960>
-- CORS checks on 23 September 2026 returned `Vary: Origin` but no `Access-Control-Allow-Origin` header for tested local and likely deployment origins. The API must allow the actual Better Gattaran production origin for direct browser requests.
+- CORS re-checked on 12 October 2026 with `curl` and an `Origin` header: the API now answers `Access-Control-Allow-Origin: https://bettergattaran.org` (GET, `OPTIONS` preflight returns 204). The header is a single fixed origin returned for every caller, so `https://www.bettergattaran.org` and `http://localhost:5173` are **not** allowed: a browser on those origins will block the request and the card will use the fallback provider. Re-check after any API or domain change.
 
 ## Transparency
 
@@ -84,3 +84,8 @@ Pages were opened with an automated web-fetch tool. Where a site returned HTTP 4
 - **PhilGEPS** (home page and notices site open, but search by procuring entity is interactive and could not be driven by the fetch tool): no notices listed.
 - **DTI CMCI Gattaran profile.** Opened, but the text returned a rank and pillar scores without a year per value and without an overall score. Not published, because figures must be reproduced with their year. <https://cmci.dti.gov.ph/lgu-profile.php?lgu=Gattaran>
 - **DOH National Health Facility Registry** (HTTP 403) and **DepEd school lists** (no single complete public list for Gattaran found; program-specific allocation lists only): no facility lists published.
+
+### Weather fallback (reviewed 2026-10-12)
+
+- **Open-Meteo forecast API (fallback provider).** Accepted as a runtime fallback behind the same weather service interface when the CIS API fails. No API key; it answers `Access-Control-Allow-Origin: *`. Its terms (<https://open-meteo.com/en/terms>) say: "You may only use the free API services for non-commercial purposes" and "You accept to the CC-BY 4.0 licence", with limits of fewer than 10,000 calls per day. The card therefore credits "Open-Meteo.com (CC BY 4.0)" whenever it is the provider. The reading is model data for a grid point near Gattaran (observed 12 October 2026: grid point 18.031633, 121.95525), not a station observation, and the card says so. <https://open-meteo.com/en/docs>
+- The card always links to PAGASA's weather advisories (<https://pagasa.dost.gov.ph/weather/weather-advisory>, a link listed on PAGASA's home page) and states that the reading is not an official weather warning.
