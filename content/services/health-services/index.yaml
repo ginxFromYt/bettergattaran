@@ -2,4 +2,9 @@
 # A page is listed only when a Gattaran or national public source backs it
 # (see docs/content-verification.md).
 
-pages: []
+pages:
+  - name: 'PhilHealth membership registration'
+    slug: 'philhealth-membership-registration'
+    publicationStatus: published
+    verificationStatus: sourced
+    description: 'National PhilHealth registration steps for informal economy members, from PhilHealth’s own page.'

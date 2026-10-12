@@ -23,6 +23,21 @@ export const SOURCE_TYPES = [
 
 export type SourceType = (typeof SOURCE_TYPES)[number];
 
+export const CONTENT_SCOPES = ['local', 'national_applicable'] as const;
+
+export type ContentScope = (typeof CONTENT_SCOPES)[number];
+
+export const DEFAULT_CONTENT_SCOPE: ContentScope = 'local';
+
+/** Source types that can back a `national_applicable` record. */
+export const NATIONAL_SOURCE_TYPES: readonly SourceType[] = [
+  'national_government',
+  'official_government_publication',
+];
+
+export const NATIONAL_SCOPE_NOTICE =
+  'This is a national government procedure that applies in Gattaran. Local office locations, hours, contacts and any local fees have not been verified by Better Gattaran. Confirm with the issuing agency.';
+
 export interface SourceReference {
   title: string;
   organization: string;
@@ -30,6 +45,8 @@ export interface SourceReference {
   type: SourceType;
   publishedAt?: string;
   asOf?: string;
+  /** Page, table or section inside the source, e.g. "p. 47, Observation 3". */
+  locator?: string;
 }
 
 export interface ContentProvenance {
@@ -115,4 +132,55 @@ export function isDueForReverification(
   const due = new Date(verified);
   due.setUTCMonth(due.getUTCMonth() + intervalMonths);
   return due <= now;
+}
+
+/** Unknown or missing scope values fall back to `local`. */
+export function parseContentScope(value: unknown): ContentScope {
+  return CONTENT_SCOPES.includes(value as ContentScope)
+    ? (value as ContentScope)
+    : DEFAULT_CONTENT_SCOPE;
+}
+
+export function hasNationalSource(
+  sources: ReadonlyArray<Pick<SourceReference, 'type'>>
+): boolean {
+  return sources.some(source => NATIONAL_SOURCE_TYPES.includes(source.type));
+}
+
+/** Sources of a figures-bearing record that lack a non-empty locator. */
+export function sourcesMissingLocator<
+  T extends Pick<SourceReference, 'locator'>,
+>(sources: readonly T[]): T[] {
+  return sources.filter(source => !source.locator?.trim());
+}
+
+export interface PublicationCandidate {
+  publicationStatus: PublicationStatus;
+  scope?: ContentScope;
+  provenance?: {
+    verificationStatus: VerificationStatus;
+    sources: ReadonlyArray<Pick<SourceReference, 'type'>>;
+  };
+}
+
+/**
+ * The single visibility policy for a content record: used by the document
+ * viewer, the build-time pre-renderer, the sitemap, and What's new.
+ */
+export function isRecordPublic(
+  record: PublicationCandidate,
+  allowSourced = true
+): boolean {
+  if (!record.provenance) return false;
+  if (
+    record.scope === 'national_applicable' &&
+    !hasNationalSource(record.provenance.sources)
+  ) {
+    return false;
+  }
+  return isPubliclyVisible(
+    record.publicationStatus,
+    record.provenance.verificationStatus,
+    allowSourced
+  );
 }

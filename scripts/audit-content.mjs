@@ -2,6 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import * as yaml from 'js-yaml';
+import {
+  validateLocators,
+  validateProject,
+  validateRequest,
+  validateScope,
+} from './audit-rules.mjs';
 
 const root = process.cwd();
 const contentRoot = path.join(root, 'content');
@@ -125,9 +131,25 @@ for (const file of files.filter(file => file.endsWith('.json'))) {
     }
   }
 
+  const isProject = path
+    .relative(contentRoot, file)
+    .startsWith(`projects${path.sep}`);
+  const relativeToContent = path.relative(contentRoot, file);
+  const isRequest =
+    relativeToContent.startsWith(`requests${path.sep}`) ||
+    relativeToContent.startsWith(`request-drafts${path.sep}`);
+  for (const message of [
+    ...validateScope(record),
+    ...validateLocators(record),
+    ...(isProject ? validateProject(record) : []),
+    ...(isRequest ? validateRequest(record) : []),
+  ]) {
+    errors.push(`${relative(file)}: ${message}`);
+  }
+
   const provenance = record.provenance;
   if (!provenance) {
-    if (publicationStatus === 'published') {
+    if (publicationStatus === 'published' && !isRequest) {
       errors.push(`${relative(file)}: published content requires provenance`);
     }
     continue;
@@ -178,6 +200,9 @@ for (const file of files.filter(file => file.endsWith('.json'))) {
     if (!isHttpUrl(source.url)) errors.push(`${label} has an invalid URL`);
     if (!sourceTypes.has(source.type))
       errors.push(`${label} has an invalid type`);
+    if (source.locator !== undefined && typeof source.locator !== 'string') {
+      errors.push(`${label} has an invalid locator`);
+    }
     if (source.publishedAt && !isDate(source.publishedAt)) {
       errors.push(`${label} has an invalid publishedAt date`);
     }

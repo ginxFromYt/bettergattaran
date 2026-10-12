@@ -60,7 +60,14 @@ describe('Better Gattaran baseline', () => {
     await waitFor(() => {
       expect(document.title).toBe('Home | Better Gattaran');
     });
-    expect(document.querySelector('link[rel="canonical"]')).toBeNull();
+    expect(
+      document.querySelector('link[rel="canonical"]')?.getAttribute('href')
+    ).toBe('https://bettergattaran.org/');
+    expect(
+      document
+        .querySelector('meta[property="og:image"]')
+        ?.getAttribute('content')
+    ).toBe('https://bettergattaran.org/bettergattaran.png');
   });
 
   it.each([
@@ -75,7 +82,7 @@ describe('Better Gattaran baseline', () => {
   });
 
   it('renders the intentional empty state for a service category', async () => {
-    renderRoute('/services/health-services');
+    renderRoute('/services/education');
 
     expect(
       await screen.findByText('Local service details pending verification')
@@ -94,6 +101,29 @@ describe('Better Gattaran baseline', () => {
       )
     ).toBeInTheDocument();
     expect(document.body).not.toHaveTextContent(/Lapu[\s-]?Lapu/i);
+  });
+
+  it('shows the national-scope notice on a national service guide', async () => {
+    renderRoute('/services/social-welfare/dswd-aics');
+
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: /Assistance to Individuals in Crisis Situation/,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/national government procedure that applies in Gattaran/)
+    ).toBeInTheDocument();
+    expect(screen.getByText('Sourced public information')).toBeInTheDocument();
+  });
+
+  it('does not publish the draft elected-officials record', async () => {
+    renderRoute('/government/departments/elected-officials');
+
+    expect(
+      await screen.findByText('Information awaiting verification')
+    ).toBeInTheDocument();
   });
 
   it('routes verified municipal content with visible provenance', async () => {
@@ -117,16 +147,5 @@ describe('Better Gattaran baseline', () => {
       'href',
       'https://psa.gov.ph/classification/psgc/barangays/0201513000'
     );
-  });
-
-  it('keeps unverified service listings in a pending state', async () => {
-    renderRoute('/services/health-services');
-
-    expect(
-      await screen.findByText('Local service details pending verification')
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByText('Get free check-ups, basic medicines, and vaccines')
-    ).not.toBeInTheDocument();
   });
 });

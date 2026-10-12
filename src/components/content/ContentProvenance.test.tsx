@@ -59,4 +59,27 @@ describe('ContentProvenance', () => {
     expect(screen.getByText('Awaiting verification')).toBeInTheDocument();
     expect(screen.queryByText('Source')).not.toBeInTheDocument();
   });
+
+  it('shows the locator of a source when present', () => {
+    render(
+      <ContentProvenance
+        provenance={{
+          verificationStatus: 'sourced',
+          sources: [
+            {
+              title: 'Annual Audit Report',
+              organization: 'Commission on Audit',
+              url: 'https://www.coa.gov.ph/example',
+              type: 'national_government',
+              locator: 'p. 47, Part II, Observation 3',
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(
+      screen.getByText('Location in source: p. 47, Part II, Observation 3')
+    ).toBeInTheDocument();
+  });
 });

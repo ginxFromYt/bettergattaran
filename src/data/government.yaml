@@ -47,3 +47,7 @@ categories:
     subcategories:
       - name: 'Transparency Documents'
         slug: 'transparency-documents'
+  - category: 'Projects'
+    slug: 'projects'
+    description: 'Projects located in Gattaran that national government agencies report in their own publications. These are not municipal projects.'
+    icon: 'HardHat'

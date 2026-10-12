@@ -2,4 +2,14 @@
 # A page is listed only when a Gattaran or national public source backs it
 # (see docs/content-verification.md).
 
-pages: []
+pages:
+  - name: 'DSWD Assistance to Individuals in Crisis Situation (AICS)'
+    slug: 'dswd-aics'
+    publicationStatus: published
+    verificationStatus: sourced
+    description: 'What DSWD says AICS is and the types of assistance it lists.'
+  - name: 'SSS membership'
+    slug: 'sss-membership'
+    publicationStatus: published
+    verificationStatus: sourced
+    description: 'What the Social Security System says about getting an SS Number and becoming a member.'

@@ -13,6 +13,9 @@ const Document = lazy(() => import('./pages/Document'));
 const Government = lazy(() => import('./pages/Government'));
 const Search = lazy(() => import('./pages/Search'));
 const About = lazy(() => import('./pages/About'));
+const Projects = lazy(() => import('./pages/Projects'));
+const FoiRequests = lazy(() => import('./pages/FoiRequests'));
+const WhatsNew = lazy(() => import('./pages/WhatsNew'));
 const Hotlines = lazy(() => import('./pages/Hotlines'));
 const ReportIncorrectInformation = lazy(
   () => import('./pages/ReportIncorrectInformation')
@@ -35,6 +38,8 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/hotlines" element={<Hotlines />} />
+                <Route path="/foi-requests" element={<FoiRequests />} />
+                <Route path="/whats-new" element={<WhatsNew />} />
                 <Route
                   path="/report-incorrect-information"
                   element={<ReportIncorrectInformation />}
@@ -45,6 +50,7 @@ function App() {
                   path="/services/:category/:documentSlug"
                   element={<Document categoryType="service" />}
                 />
+                <Route path="/government/projects" element={<Projects />} />
                 <Route path="/government/:category" element={<Government />} />
                 <Route path="/government" element={<Government />} />
                 <Route

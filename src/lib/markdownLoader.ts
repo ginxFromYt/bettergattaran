@@ -5,7 +5,9 @@ import {
   SOURCE_TYPES,
   VERIFICATION_STATUSES,
   isSafeHttpUrl,
+  parseContentScope,
   type ContentProvenance,
+  type ContentScope,
   type PublicationStatus,
   type SourceReference,
 } from './contentGovernance';
@@ -20,7 +22,7 @@ export type {
 /**
  * Replaces {PLACEHOLDER} tokens using JSON data first, then VITE_ env vars.
  */
-function interpolate(
+export function interpolate(
   content: string,
   data: Record<string, unknown> = {}
 ): string {
@@ -38,13 +40,17 @@ export interface MarkdownContent {
   data?: Record<string, unknown>;
   provenance?: ContentProvenance;
   publicationStatus: PublicationStatus;
+  scope: ContentScope;
+  containsFigures: boolean;
 }
 
 function isDate(value: unknown): value is string {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
-function parseProvenance(value: unknown): ContentProvenance | undefined {
+export function parseProvenanceData(
+  value: unknown
+): ContentProvenance | undefined {
   if (!value || typeof value !== 'object') return undefined;
 
   const candidate = value as Record<string, unknown>;
@@ -89,6 +95,9 @@ function parseProvenance(value: unknown): ContentProvenance | undefined {
               ? { publishedAt: entry.publishedAt }
               : {}),
             ...(isDate(entry.asOf) ? { asOf: entry.asOf } : {}),
+            ...(typeof entry.locator === 'string' && entry.locator.trim()
+              ? { locator: entry.locator.trim() }
+              : {}),
           },
         ];
       })
@@ -115,6 +124,33 @@ function parsePublicationStatus(value: unknown): PublicationStatus {
     return value as PublicationStatus;
   }
   return 'draft';
+}
+
+/** Builds page content from raw Markdown and its companion JSON data. */
+export function buildMarkdownContent(
+  raw: string,
+  data: Record<string, unknown> = {}
+): MarkdownContent {
+  const content = interpolate(raw, data);
+
+  const titleMatch = content.match(/^#\s+(.+)$/m);
+  const title = titleMatch ? titleMatch[1] : undefined;
+
+  const descriptionMatch = content.match(/^#\s+.+$\n\n(.+?)(?:\n\n|$)/s);
+  const description = descriptionMatch
+    ? descriptionMatch[1].replace(/^>\s*/, '').trim()
+    : undefined;
+
+  return {
+    content,
+    title,
+    description,
+    data,
+    provenance: parseProvenanceData(data.provenance),
+    publicationStatus: parsePublicationStatus(data.publicationStatus),
+    scope: parseContentScope(data.scope),
+    containsFigures: data.containsFigures === true,
+  };
 }
 
 /**
@@ -147,24 +183,7 @@ export async function loadMarkdownContent(
     const module = await import(
       `../../content/${dir}/${categorySlug}/${documentSlug}.md?raw`
     );
-    const content = interpolate(module.default, data);
-
-    const titleMatch = content.match(/^#\s+(.+)$/m);
-    const title = titleMatch ? titleMatch[1] : undefined;
-
-    const descriptionMatch = content.match(/^#\s+.+$\n\n(.+?)(?:\n\n|$)/s);
-    const description = descriptionMatch
-      ? descriptionMatch[1].replace(/^>\s*/, '').trim()
-      : undefined;
-
-    return {
-      content,
-      title,
-      description,
-      data,
-      provenance: parseProvenance(data.provenance),
-      publicationStatus: parsePublicationStatus(data.publicationStatus),
-    };
+    return buildMarkdownContent(module.default, data);
   } catch (error) {
     console.error(
       `Failed to load markdown content for document: ${documentSlug}`,

@@ -26,7 +26,8 @@ import SEO from '../components/SEO';
 import { sanitizeLegacyServiceContent } from '../lib/legacyContent';
 import ContentProvenance from '../components/content/ContentProvenance';
 import ReportCorrectionLink from '../components/content/ReportCorrectionLink';
-import { isPubliclyVisible } from '../lib/contentGovernance';
+import NationalScopeNotice from '../components/content/NationalScopeNotice';
+import { isRecordPublic } from '../lib/contentGovernance';
 import { contentGovernanceConfig } from '../config/contentGovernance';
 
 interface DocumentProps {
@@ -222,13 +223,10 @@ export default function Document({
     return null;
   }
 
-  const isVisible =
-    markdownContent.provenance &&
-    isPubliclyVisible(
-      markdownContent.publicationStatus,
-      markdownContent.provenance.verificationStatus,
-      contentGovernanceConfig.allowSourcedContent
-    );
+  const isVisible = isRecordPublic(
+    markdownContent,
+    contentGovernanceConfig.allowSourcedContent
+  );
 
   if (!isVisible) {
     return (
@@ -263,7 +261,11 @@ export default function Document({
       />
       <Section className="p-3 mb-12">
         <Breadcrumbs className="mb-8" items={breadcrumbs} />
+        {markdownContent.scope === 'national_applicable' && (
+          <NationalScopeNotice />
+        )}
         {categoryType === 'service' &&
+          markdownContent.scope !== 'national_applicable' &&
           markdownContent.provenance?.verificationStatus !== 'verified' && (
             <Banner
               type="info"

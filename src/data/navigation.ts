@@ -35,6 +35,8 @@ export const footerNavigation = {
         { label: 'Home', href: '/' },
         { label: 'Municipal Information', href: '/government' },
         { label: 'Service Categories', href: '/services' },
+        { label: 'What’s new', href: '/whats-new' },
+        { label: 'Information requests', href: '/foi-requests' },
         { label: 'About & verification', href: '/about' },
         {
           label: 'Report incorrect information',
