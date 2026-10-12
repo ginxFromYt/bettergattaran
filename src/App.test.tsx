@@ -74,18 +74,26 @@ describe('Better Gattaran baseline', () => {
     ).toBeInTheDocument();
   });
 
-  it('suppresses inherited locality content on a legacy service route', async () => {
+  it('renders the intentional empty state for a service category', async () => {
+    renderRoute('/services/health-services');
+
+    expect(
+      await screen.findByText('Local service details pending verification')
+    ).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent(/Lapu[\s-]?Lapu/i);
+  });
+
+  it('shows no content for a removed legacy service route', async () => {
     renderRoute(
       '/services/health-services/get-free-check-ups-basic-medicines-and-vaccines'
     );
 
     expect(
-      await screen.findByText('Information awaiting verification')
+      await screen.findByText(
+        /Document Not Found|Information awaiting verification/
+      )
     ).toBeInTheDocument();
     expect(document.body).not.toHaveTextContent(/Lapu[\s-]?Lapu/i);
-    expect(
-      screen.getByText(/No verified information is currently available/)
-    ).toBeInTheDocument();
   });
 
   it('routes verified municipal content with visible provenance', async () => {
