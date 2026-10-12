@@ -33,9 +33,13 @@ These areas remain empty or draft and render intentional awaiting-verification s
 
 ## E. Placeholder or inherited demo content
 
-Fifteen Markdown service files contain Lapu-Lapu/Cebu starter content. Other service index entries describe generic hypothetical services for which no Markdown or Gattaran source exists. The empty public-market-stall file has no publishable content.
+Phase 4 removed this content (see Git history before the Phase 4 cleanup commit for the original files):
 
-All are treated as drafts. They are excluded from listings, search indexing, and direct document rendering. They remain in the repository for upstream traceability and possible future replacement, not as claims about Gattaran.
+- Fifteen Markdown service files containing Lapu-Lapu/Cebu starter content, and the empty public-market-stall file.
+- All hypothetical service entries in `content/services/*/index.yaml`. Category files are kept with `pages: []`, so each category renders its intentional "pending verification" empty state.
+- Unused starter-kit leftovers `src/components/I18nTest.tsx` and `src/assets/react.svg` (confirmed unreferenced by grep).
+
+`src/lib/legacyContent.ts` is retained as a defensive guard against reintroducing inherited Lapu-Lapu content.
 
 ## Architecture findings
 
