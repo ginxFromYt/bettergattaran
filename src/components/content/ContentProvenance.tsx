@@ -93,6 +93,11 @@ export default function ContentProvenance({
                 <span className="block text-xs">
                   {sourceTypeLabels[source.type]}
                 </span>
+                {source.locator && (
+                  <span className="block text-xs">
+                    Location in source: {source.locator}
+                  </span>
+                )}
                 {source.publishedAt && (
                   <span className="block text-xs">
                     Source published:{' '}

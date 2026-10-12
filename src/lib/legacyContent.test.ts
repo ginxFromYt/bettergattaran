@@ -7,6 +7,8 @@ describe('sanitizeLegacyServiceContent', () => {
       title: 'Legacy health guide',
       content: '# Lapu-Lapu City Health Services\n\nLegacy local details.',
       publicationStatus: 'draft',
+      scope: 'local',
+      containsFigures: false,
     });
 
     expect(result.title).toBe('Service guide pending verification');
@@ -24,6 +26,8 @@ describe('sanitizeLegacyServiceContent', () => {
       title: 'General guide',
       content: '# General guidance',
       publicationStatus: 'published' as const,
+      scope: 'local' as const,
+      containsFigures: false,
     };
 
     expect(sanitizeLegacyServiceContent(content)).toBe(content);

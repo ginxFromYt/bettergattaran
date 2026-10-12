@@ -5,7 +5,9 @@ import {
   SOURCE_TYPES,
   VERIFICATION_STATUSES,
   isSafeHttpUrl,
+  parseContentScope,
   type ContentProvenance,
+  type ContentScope,
   type PublicationStatus,
   type SourceReference,
 } from './contentGovernance';
@@ -38,6 +40,8 @@ export interface MarkdownContent {
   data?: Record<string, unknown>;
   provenance?: ContentProvenance;
   publicationStatus: PublicationStatus;
+  scope: ContentScope;
+  containsFigures: boolean;
 }
 
 function isDate(value: unknown): value is string {
@@ -89,6 +93,9 @@ function parseProvenance(value: unknown): ContentProvenance | undefined {
               ? { publishedAt: entry.publishedAt }
               : {}),
             ...(isDate(entry.asOf) ? { asOf: entry.asOf } : {}),
+            ...(typeof entry.locator === 'string' && entry.locator.trim()
+              ? { locator: entry.locator.trim() }
+              : {}),
           },
         ];
       })
@@ -164,6 +171,8 @@ export async function loadMarkdownContent(
       data,
       provenance: parseProvenance(data.provenance),
       publicationStatus: parsePublicationStatus(data.publicationStatus),
+      scope: parseContentScope(data.scope),
+      containsFigures: data.containsFigures === true,
     };
   } catch (error) {
     console.error(
