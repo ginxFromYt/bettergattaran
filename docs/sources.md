@@ -1,6 +1,6 @@
 # Source inventory
 
-Last reviewed: 2026-09-23
+Last reviewed: 2026-10-12
 
 This inventory records sources considered during Phases 2–3.1. Inclusion here does not make every fact on a source suitable for publication.
 
@@ -45,3 +45,11 @@ This inventory records sources considered during Phases 2–3.1. Inclusion here 
 - Wikipedia and other encyclopedic/third-party municipality profiles: rejected as sole authorities because the underlying primary PSA record is available.
 - Unverified Facebook pages, search-result social snippets, business directories, map listings, scraped contact sites, and reposts: rejected because official ownership, currency, or provenance could not be established.
 - Third-party pages containing postal codes, land area, contact details, or office lists: rejected pending confirmation from the issuing government organization.
+
+## Phase 4 — National-agency projects (reviewed 2026-10-12)
+
+Pages were opened with an automated web-fetch tool that summarizes page text, so a maintainer should confirm each quoted sentence in a browser before promoting any record to `verified`.
+
+- **DPWH news release, "DPWH Completes P50-M Flood Defense Project in Gattaran, Cagayan" (7 December 2023).** Accepted (`national_government`). Supports the Casicallan Flood Control Project row: 170-meter concrete revetment with hexapods, Barangay Casicallan, 2023 General Appropriations Act, "P50 million". The release names no contractor. <https://dpwh.gov.ph/DPWH/news/31832>
+- **DPWH news release, "DPWH Paves Road to Tanglagan Falls in Gattaran, Cagayan" (19 April 2022).** Accepted (`national_government`). Supports two rows: the P35 Million road improvement in Barangay Tanglagan (2020 and 2021 GAA) and the additional P7.1 million road. The release names no contractor and states no fund source for the second project. <https://dpwh.gov.ph/DPWH/news/26309>
+- **DPWH Cagayan 1st District Engineering Office, Procurement Monitoring Report, second semester FY 2024, civil works (PDF).** Opened and downloaded, but **no rows published**. The table is a very wide, multi-line layout; project names combine several municipalities (clustered projects) and road names such as "Jct. Gattaran-Cumao" appear in rows that may be outside Gattaran. The report has Approved Budget and Contract Cost columns but no contractor column, and its "Completed" refers to the procurement activity, not the project. Rows need human extraction (see the Phase 4 handoff). <https://dpwh.gov.ph/DPWH/sites/default/files/pmr/pmrsecondsemesterforfy2024dpwh-cagayan-1stdeocivilworks.pdf>

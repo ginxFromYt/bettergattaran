@@ -44,3 +44,39 @@ export function validateLocators(record) {
   });
   return errors;
 }
+
+const nonEmpty = value => typeof value === 'string' && value.trim() !== '';
+
+/** Returns error messages for a content/projects/*.json record. */
+export function validateProject(record) {
+  const errors = [];
+  const project = record.project;
+  if (!project || typeof project !== 'object') {
+    return ['project record needs a "project" object'];
+  }
+  for (const field of ['name', 'implementingAgency', 'status', 'location']) {
+    if (!nonEmpty(project[field])) errors.push(`project.${field} is required`);
+  }
+  const amount = project.amount;
+  if (
+    !amount ||
+    !nonEmpty(amount.text) ||
+    !nonEmpty(amount.statement) ||
+    typeof amount.value !== 'number' ||
+    !Number.isFinite(amount.value)
+  ) {
+    errors.push(
+      'project.amount needs text, a numeric value and the source statement'
+    );
+  }
+  if (project.contractor !== undefined && !nonEmpty(project.contractor)) {
+    errors.push('project.contractor must be omitted when the source has none');
+  }
+  if (record.containsFigures !== true) {
+    errors.push('project records must set containsFigures to true');
+  }
+  if (record.scope !== undefined && record.scope !== 'local') {
+    errors.push('project records must have local scope');
+  }
+  return errors;
+}

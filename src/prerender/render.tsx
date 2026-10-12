@@ -8,12 +8,15 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ContentProvenance from '../components/content/ContentProvenance';
+import ProjectsTable from '../components/content/ProjectsTable';
 import NationalScopeNotice from '../components/content/NationalScopeNotice';
 import { createMarkdownComponents } from '../lib/markdownComponents';
 import { getTypographyTheme } from '../lib/typographyThemes';
 import { siteConfig } from '../config/site';
 import { contentGovernanceConfig } from '../config/contentGovernance';
 import { publicHotlines } from '../lib/hotlines';
+import { publicProjects } from '../lib/projects';
+import { PROJECTS_STATEMENT } from '../lib/projectsCopy';
 import { serviceCategories, governmentCategories } from '../data/yamlLoader';
 import common from '../../public/locales/en/common.json';
 import type { HotlineRecord } from '../lib/hotlines';
@@ -184,6 +187,17 @@ function Body({ route }: { route: PublicRoute }) {
               <Hotline key={hotline.id} hotline={hotline} />
             ))}
           </div>
+        </>
+      );
+    case 'projects':
+      return (
+        <>
+          <h1 className="text-3xl font-bold">{route.title}</h1>
+          <p className="mt-3 max-w-3xl text-gray-700">{PROJECTS_STATEMENT}</p>
+          <div className="mt-6">
+            <ProjectsTable projects={publicProjects} />
+          </div>
+          <RightOfReply path={route.path} />
         </>
       );
     case 'about':

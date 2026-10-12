@@ -2,7 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import * as yaml from 'js-yaml';
-import { validateLocators, validateScope } from './audit-rules.mjs';
+import {
+  validateLocators,
+  validateProject,
+  validateScope,
+} from './audit-rules.mjs';
 
 const root = process.cwd();
 const contentRoot = path.join(root, 'content');
@@ -126,9 +130,13 @@ for (const file of files.filter(file => file.endsWith('.json'))) {
     }
   }
 
+  const isProject = path
+    .relative(contentRoot, file)
+    .startsWith(`projects${path.sep}`);
   for (const message of [
     ...validateScope(record),
     ...validateLocators(record),
+    ...(isProject ? validateProject(record) : []),
   ]) {
     errors.push(`${relative(file)}: ${message}`);
   }

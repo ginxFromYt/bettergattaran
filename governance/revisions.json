@@ -48,6 +48,27 @@
       "changedFields": ["phone", "publicationStatus", "provenance"],
       "responsible": "Better Gattaran maintainers",
       "timestamp": "2026-09-23T16:25:48+08:00"
+    },
+    {
+      "contentId": "projects/dpwh-casicallan-flood-control",
+      "action": "created",
+      "changedFields": ["publicationStatus", "provenance", "project"],
+      "responsible": "Claude (agent), pending maintainer review",
+      "timestamp": "2026-10-12T13:00:00+08:00"
+    },
+    {
+      "contentId": "projects/dpwh-tanglagan-falls-road",
+      "action": "created",
+      "changedFields": ["publicationStatus", "provenance", "project"],
+      "responsible": "Claude (agent), pending maintainer review",
+      "timestamp": "2026-10-12T13:00:00+08:00"
+    },
+    {
+      "contentId": "projects/dpwh-tanglagan-falls-additional-road",
+      "action": "created",
+      "changedFields": ["publicationStatus", "provenance", "project"],
+      "responsible": "Claude (agent), pending maintainer review",
+      "timestamp": "2026-10-12T13:00:00+08:00"
     }
   ]
 }

@@ -14,7 +14,9 @@ These seven records are `published` + `verified`, have public provenance compani
 
 ## B. Has a source but requires review
 
-No public record is currently classified `sourced`. The model supports it, and deployment can disable all sourced content with configuration.
+Phase 4 adds `sourced` records that an agent checked against official government sources on 2026-10-12. Each needs maintainer confirmation before promotion to `verified`; deployment can hide all sourced content with `VITE_ALLOW_SOURCED_CONTENT=false`.
+
+- National-agency projects in Gattaran (`content/projects/*`): three DPWH news-release rows.
 
 ## C. No reliable source currently stored
 

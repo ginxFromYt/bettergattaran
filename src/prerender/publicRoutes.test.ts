@@ -72,6 +72,7 @@ function fixture(
       },
     },
     hotlines: [],
+    projects: [],
     allowSourced,
   };
 }
@@ -180,9 +181,27 @@ describe('default public content', () => {
         '/hotlines',
         '/government/departments/municipality-overview',
         '/government/departments/municipal-mayor',
+        '/government/projects',
       ])
     );
     expect(result).not.toContain('/government/departments/executive');
     expect(result.some(path => path.startsWith('/services/'))).toBe(false);
+  });
+});
+
+describe('projects route', () => {
+  it('is added only when public project rows exist', () => {
+    const none = fixture({}, {});
+    const some: PublicContentInput = {
+      ...none,
+      projects: [
+        {
+          provenance: { lastUpdatedAt: '2026-10-12' },
+        } as PublicContentInput['projects'][number],
+      ],
+    };
+
+    expect(paths(none)).not.toContain('/government/projects');
+    expect(paths(some)).toContain('/government/projects');
   });
 });

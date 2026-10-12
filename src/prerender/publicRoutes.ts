@@ -17,12 +17,15 @@ import {
 } from '../lib/markdownLoader';
 import { isRecordPublic } from '../lib/contentGovernance';
 import { getPublicHotlines, type HotlineRecord } from '../lib/hotlines';
+import { publicProjects, type ProjectRecord } from '../lib/projects';
+import { PROJECTS_DESCRIPTION, PROJECTS_TITLE } from '../lib/projectsCopy';
 import { contentGovernanceConfig } from '../config/contentGovernance';
 
 export type RouteKind =
   | 'home'
   | 'about'
   | 'hotlines'
+  | 'projects'
   | 'services'
   | 'government'
   | 'category'
@@ -50,6 +53,8 @@ export interface PublicContentInput {
   /** Category index (already filtered by the index-level policy), by slug. */
   indexes: Record<string, CategoryIndex>;
   hotlines: HotlineRecord[];
+  /** Already filtered by the project visibility policy. */
+  projects: ProjectRecord[];
   allowSourced: boolean;
 }
 
@@ -81,6 +86,7 @@ export async function loadDefaultInput(): Promise<PublicContentInput> {
     companions: companionFiles,
     indexes: Object.fromEntries(entries),
     hotlines: getPublicHotlines(),
+    projects: publicProjects,
     allowSourced: contentGovernanceConfig.allowSourcedContent,
   };
 }
@@ -242,6 +248,23 @@ export function collectPublicRoutes(input: PublicContentInput): PublicRoute[] {
         'Verified public information about Gattaran and its municipal government.',
     },
     ...categoryRoutes,
+    ...(input.projects.length > 0
+      ? [
+          {
+            path: '/government/projects',
+            kind: 'projects' as const,
+            title: PROJECTS_TITLE,
+            description: PROJECTS_DESCRIPTION,
+            lastModified: latestDate(
+              ...input.projects.map(
+                record =>
+                  record.provenance.lastUpdatedAt ??
+                  record.provenance.lastVerifiedAt
+              )
+            ),
+          },
+        ]
+      : []),
     ...documents,
   ];
 }

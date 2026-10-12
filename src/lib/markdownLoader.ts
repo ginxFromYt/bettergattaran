@@ -48,7 +48,9 @@ function isDate(value: unknown): value is string {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
-function parseProvenance(value: unknown): ContentProvenance | undefined {
+export function parseProvenanceData(
+  value: unknown
+): ContentProvenance | undefined {
   if (!value || typeof value !== 'object') return undefined;
 
   const candidate = value as Record<string, unknown>;
@@ -144,7 +146,7 @@ export function buildMarkdownContent(
     title,
     description,
     data,
-    provenance: parseProvenance(data.provenance),
+    provenance: parseProvenanceData(data.provenance),
     publicationStatus: parsePublicationStatus(data.publicationStatus),
     scope: parseContentScope(data.scope),
     containsFigures: data.containsFigures === true,
