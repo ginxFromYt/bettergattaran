@@ -18,3 +18,8 @@ pages:
     publicationStatus: published
     verificationStatus: verified
     description: 'The current municipal mayor listed by the Provincial Government of Cagayan.'
+  - name: 'Elected officials'
+    slug: 'elected-officials'
+    publicationStatus: draft
+    verificationStatus: awaiting_verification
+    description: 'Vice Mayor and Sangguniang Bayan members, pending a COMELEC or provincial source.'

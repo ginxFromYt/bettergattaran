@@ -185,7 +185,10 @@ describe('default public content', () => {
       ])
     );
     expect(result).not.toContain('/government/departments/executive');
-    expect(result.some(path => path.startsWith('/services/'))).toBe(false);
+    expect(result).toContain('/services/social-welfare/dswd-aics');
+    expect(result).not.toContain('/government/departments/elected-officials');
+    // Categories without a visible page are not routes of their own.
+    expect(result).not.toContain('/services/education');
   });
 });
 

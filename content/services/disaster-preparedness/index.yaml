@@ -2,4 +2,9 @@
 # A page is listed only when a Gattaran or national public source backs it
 # (see docs/content-verification.md).
 
-pages: []
+pages:
+  - name: 'Official hazard and weather information tools'
+    slug: 'official-hazard-and-weather-tools'
+    publicationStatus: published
+    verificationStatus: sourced
+    description: 'Links to HazardHunterPH and PAGASA advisories published by Philippine government agencies.'

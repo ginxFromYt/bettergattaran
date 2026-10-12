@@ -17,11 +17,15 @@ These seven records are `published` + `verified`, have public provenance compani
 Phase 4 adds `sourced` records that an agent checked against official government sources on 2026-10-12. Each needs maintainer confirmation before promotion to `verified`; deployment can hide all sourced content with `VITE_ALLOW_SOURCED_CONTENT=false`.
 
 - National-agency projects in Gattaran (`content/projects/*`): three DPWH news-release rows.
+- National service guides (`national_applicable`): PhilHealth membership registration, DSWD AICS, SSS membership.
+- Official hazard and weather information tools (links to HazardHunterPH and PAGASA).
+
+Drafts awaiting a source: elected officials (Vice Mayor and Sangguniang Bayan).
 
 ## C. No reliable source currently stored
 
 - Municipal office structure, office heads, locations, contacts, and hours.
-- Vice mayor and Sangguniang Bayan membership.
+- Vice mayor and Sangguniang Bayan membership (draft `elected-officials` record awaits a COMELEC or provincial source).
 - Other emergency and public-safety contacts, including Gattaran MDRRMO, police, and fire contacts.
 - Local ordinances, resolutions, consultations, notices, projects, budgets, procurement records, and service procedures.
 - Gattaran-specific requirements, fees, processing times, schedules, and eligibility rules.
