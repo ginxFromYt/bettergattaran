@@ -33,6 +33,12 @@ jobs:
       - run: npm test
       - run: npm run lint
       - run: npm run build
+      # Production may hide sourced records; build that way too so the
+      # draft exclusion and leak check are exercised in both modes.
+      - name: Build with sourced content hidden
+        run: npm run build
+        env:
+          VITE_ALLOW_SOURCED_CONTENT: 'false'
 
   source-links:
     if: >-

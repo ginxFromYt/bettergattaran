@@ -93,6 +93,17 @@ for (const file of shippedSources) {
   }
 }
 
+// The document loader's dynamic-import map keeps every content file path in
+// the bundle, and chunk names follow file names. A page title that matches
+// its own slug (e.g. "PhilHealth membership registration" and
+// philhealth-membership-registration.md) is therefore not a leak. The paths
+// are public in the repository anyway; only file contents are checked.
+publicTexts.push(
+  walk(contentRoot)
+    .map(file => path.relative(root, file).split(path.sep).join('/'))
+    .join('\n')
+);
+
 if (!fs.existsSync(dist)) {
   console.error('dist/ not found. Run `vite build` first.');
   process.exit(1);
