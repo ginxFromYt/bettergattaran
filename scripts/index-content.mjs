@@ -17,10 +17,20 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import * as yaml from 'js-yaml';
 import 'dotenv/config';
+import {
+  allowSourcedFromEnv,
+  isIndexEntryPublic,
+  isRawRecordPublic,
+} from './lib/visibility.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const INDEX_NAME = 'content';
+// Same switch as the app (VITE_ALLOW_SOURCED_CONTENT); ALLOW_SOURCED_CONTENT
+// still overrides it for existing indexing setups.
+const ALLOW_SOURCED = allowSourcedFromEnv(
+  process.env.ALLOW_SOURCED_CONTENT ?? process.env.VITE_ALLOW_SOURCED_CONTENT
+);
 
 const client = new Meilisearch({
   host: process.env.MEILISEARCH_HOST ?? 'http://localhost:7700',
@@ -60,20 +70,9 @@ function loadMarkdownPages(dir, categorySlug, categoryName, type) {
   try {
     const indexYaml = readFileSync(indexPath, 'utf8');
     const indexData = yaml.load(indexYaml);
-    pages = (indexData.pages ?? []).filter(page => {
-      const publicationStatus =
-        page.publicationStatus ?? (page.published ? 'published' : 'draft');
-      const verificationStatus =
-        page.verificationStatus ??
-        (page.published ? 'verified' : 'awaiting_verification');
-      const allowSourced = process.env.ALLOW_SOURCED_CONTENT !== 'false';
-      return (
-        publicationStatus === 'published' &&
-        (verificationStatus === 'verified' ||
-          verificationStatus === 'outdated' ||
-          (allowSourced && verificationStatus === 'sourced'))
-      );
-    });
+    pages = (indexData.pages ?? []).filter(page =>
+      isIndexEntryPublic(page, ALLOW_SOURCED)
+    );
   } catch {
     return documents;
   }
@@ -86,14 +85,13 @@ function loadMarkdownPages(dir, categorySlug, categoryName, type) {
     );
     try {
       const companion = JSON.parse(readFileSync(jsonPath, 'utf8'));
-      const allowSourced = process.env.ALLOW_SOURCED_CONTENT !== 'false';
       const companionStatus = companion.provenance?.verificationStatus;
-      const eligible =
-        companion.publicationStatus === 'published' &&
-        (companionStatus === 'verified' ||
-          companionStatus === 'outdated' ||
-          (allowSourced && companionStatus === 'sourced'));
-      if (!eligible || companionStatus !== page.verificationStatus) continue;
+      if (
+        !isRawRecordPublic(companion, ALLOW_SOURCED) ||
+        companionStatus !== page.verificationStatus
+      ) {
+        continue;
+      }
 
       const raw = readFileSync(mdPath, 'utf8');
       const title = extractTitle(raw) || page.name;
@@ -120,35 +118,82 @@ function loadMarkdownPages(dir, categorySlug, categoryName, type) {
 
 function loadHotlines() {
   const directory = join(ROOT, 'content/hotlines');
-  const allowSourced = process.env.ALLOW_SOURCED_CONTENT !== 'false';
 
   return readdirSync(directory)
     .filter(file => file.endsWith('.json'))
     .flatMap(file => {
       try {
         const record = JSON.parse(readFileSync(join(directory, file), 'utf8'));
-        const status = record.provenance?.verificationStatus;
+        // Mirrors getPublicHotlines() in src/lib/hotlines.ts.
         const eligible =
-          record.publicationStatus === 'published' &&
-          record.provenance?.sources?.length > 0 &&
-          (status === 'verified' ||
-            status === 'outdated' ||
-            (allowSourced && status === 'sourced'));
-        if (!eligible || !/^\+?\d{3,15}$/.test(record.phone)) return [];
+          isRawRecordPublic(record, ALLOW_SOURCED) &&
+          record.provenance.sources?.length > 0 &&
+          Boolean(record.provenance.lastVerifiedAt) &&
+          /^\+?\d{3,15}$/.test(record.phone);
+        if (!eligible) return [];
 
         const slug = file.replace(/\.json$/, '');
         return [
           {
             id: `hotline-${slug}`,
             title: record.name,
-            description: `Verified emergency contact: ${record.displayPhone}`,
+            description: `Emergency contact: ${record.displayPhone}`,
             content: `${record.name} ${record.displayPhone}`,
             type: 'hotline',
             category: 'Emergency hotlines',
             categorySlug: 'hotlines',
             slug,
             url: `/hotlines#${slug}`,
-            verificationStatus: status,
+            verificationStatus: record.provenance.verificationStatus,
+          },
+        ];
+      } catch {
+        return [];
+      }
+    });
+}
+
+function loadProjects() {
+  const directory = join(ROOT, 'content/projects');
+
+  return readdirSync(directory)
+    .filter(file => file.endsWith('.json'))
+    .flatMap(file => {
+      try {
+        const record = JSON.parse(readFileSync(join(directory, file), 'utf8'));
+        const project = record.project;
+        const sources = record.provenance?.sources ?? [];
+        // Mirrors getPublicProjects() in src/lib/projects.ts.
+        const eligible =
+          isRawRecordPublic(record, ALLOW_SOURCED) &&
+          sources.length > 0 &&
+          sources.every(source => Boolean(source.locator)) &&
+          typeof project?.name === 'string';
+        if (!eligible) return [];
+
+        const slug = file.replace(/\.json$/, '');
+        return [
+          {
+            id: `project-${slug}`,
+            title: project.name,
+            description: [project.implementingAgency, project.location]
+              .filter(Boolean)
+              .join(' · '),
+            content: [
+              project.name,
+              project.implementingAgency,
+              project.location,
+              project.status,
+              project.contractor,
+            ]
+              .filter(Boolean)
+              .join(' '),
+            type: 'project',
+            category: 'National government projects in Gattaran',
+            categorySlug: 'projects',
+            slug,
+            url: '/government/projects',
+            verificationStatus: record.provenance.verificationStatus,
           },
         ];
       } catch {
@@ -195,6 +240,7 @@ async function indexContent() {
   }
 
   documents.push(...loadHotlines());
+  documents.push(...loadProjects());
 
   if (documents.length === 0) {
     console.warn('No documents found to index. Check content/ directory.');

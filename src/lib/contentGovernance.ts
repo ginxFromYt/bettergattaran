@@ -1,3 +1,10 @@
+import {
+  NATIONAL_SOURCE_TYPES as SHARED_NATIONAL_SOURCE_TYPES,
+  hasNationalSource as sharedHasNationalSource,
+  isPubliclyVisible as sharedIsPubliclyVisible,
+  isRecordPublic as sharedIsRecordPublic,
+} from '../../scripts/lib/visibility.mjs';
+
 export const VERIFICATION_STATUSES = [
   'awaiting_verification',
   'sourced',
@@ -30,10 +37,8 @@ export type ContentScope = (typeof CONTENT_SCOPES)[number];
 export const DEFAULT_CONTENT_SCOPE: ContentScope = 'local';
 
 /** Source types that can back a `national_applicable` record. */
-export const NATIONAL_SOURCE_TYPES: readonly SourceType[] = [
-  'national_government',
-  'official_government_publication',
-];
+export const NATIONAL_SOURCE_TYPES =
+  SHARED_NATIONAL_SOURCE_TYPES as readonly SourceType[];
 
 export const NATIONAL_SCOPE_NOTICE =
   'This is a national government procedure that applies in Gattaran. Local office locations, hours, contacts and any local fees have not been verified by Better Gattaran. Confirm with the issuing agency.';
@@ -111,11 +116,10 @@ export function isPubliclyVisible(
   verificationStatus: VerificationStatus,
   allowSourced = true
 ): boolean {
-  if (publicationStatus !== 'published') return false;
-  return (
-    verificationStatus === 'verified' ||
-    (allowSourced && verificationStatus === 'sourced') ||
-    verificationStatus === 'outdated'
+  return sharedIsPubliclyVisible(
+    publicationStatus,
+    verificationStatus,
+    allowSourced
   );
 }
 
@@ -144,7 +148,7 @@ export function parseContentScope(value: unknown): ContentScope {
 export function hasNationalSource(
   sources: ReadonlyArray<Pick<SourceReference, 'type'>>
 ): boolean {
-  return sources.some(source => NATIONAL_SOURCE_TYPES.includes(source.type));
+  return sharedHasNationalSource(sources);
 }
 
 /** Sources of a figures-bearing record that lack a non-empty locator. */
@@ -165,22 +169,13 @@ export interface PublicationCandidate {
 
 /**
  * The single visibility policy for a content record: used by the document
- * viewer, the build-time pre-renderer, the sitemap, and What's new.
+ * viewer, the build-time pre-renderer, the sitemap, What's new, the build's
+ * draft exclusion and the search indexer. The rules live in
+ * scripts/lib/visibility.mjs so Node scripts share them without TypeScript.
  */
 export function isRecordPublic(
   record: PublicationCandidate,
   allowSourced = true
 ): boolean {
-  if (!record.provenance) return false;
-  if (
-    record.scope === 'national_applicable' &&
-    !hasNationalSource(record.provenance.sources)
-  ) {
-    return false;
-  }
-  return isPubliclyVisible(
-    record.publicationStatus,
-    record.provenance.verificationStatus,
-    allowSourced
-  );
+  return sharedIsRecordPublic(record, allowSourced);
 }

@@ -1,9 +1,9 @@
 import * as yaml from 'js-yaml';
-import {
-  isPubliclyVisible,
-  type PublicationStatus,
-  type VerificationStatus,
+import type {
+  PublicationStatus,
+  VerificationStatus,
 } from '../lib/contentGovernance';
+import { isIndexEntryPublic } from '../../scripts/lib/visibility.mjs';
 import { contentGovernanceConfig } from '../config/contentGovernance';
 
 // Type definitions for the services data
@@ -106,18 +106,9 @@ export async function loadCategoryIndex(
       title: indexData.title,
       description: indexData.description,
       layout: indexData.layout ?? 'list',
-      pages: (indexData.pages || []).filter(page => {
-        const publicationStatus =
-          page.publicationStatus ?? (page.published ? 'published' : 'draft');
-        const verificationStatus =
-          page.verificationStatus ??
-          (page.published ? 'verified' : 'awaiting_verification');
-        return isPubliclyVisible(
-          publicationStatus,
-          verificationStatus,
-          contentGovernanceConfig.allowSourcedContent
-        );
-      }),
+      pages: (indexData.pages || []).filter(page =>
+        isIndexEntryPublic(page, contentGovernanceConfig.allowSourcedContent)
+      ),
     };
   } catch (parseError) {
     console.warn(

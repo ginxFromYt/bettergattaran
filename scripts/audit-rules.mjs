@@ -1,14 +1,12 @@
 /**
  * Pure audit rules shared by scripts/audit-content.mjs and its tests.
- * Mirrors the helpers in src/lib/contentGovernance.ts (the audit runs in Node
- * without the TypeScript toolchain, so the constants are repeated here).
+ * Visibility rules and national source types come from the shared policy in
+ * scripts/lib/visibility.mjs, which the app also uses.
  */
+import { NATIONAL_SOURCE_TYPES } from './lib/visibility.mjs';
 
 export const contentScopes = ['local', 'national_applicable'];
-export const nationalSourceTypes = [
-  'national_government',
-  'official_government_publication',
-];
+export const nationalSourceTypes = NATIONAL_SOURCE_TYPES;
 
 /** Returns error messages (without a file prefix) for scope-related rules. */
 export function validateScope(record) {
