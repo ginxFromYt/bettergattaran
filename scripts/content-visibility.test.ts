@@ -243,6 +243,22 @@ describe('leak check', () => {
     expect(fingerprints).toEqual([]);
   });
 
+  it('does not treat a page name that matches its file name as a leak', () => {
+    // The import map keeps content paths in the bundle; a hidden index entry
+    // whose name equals its slug must not fail the build on that alone.
+    const fingerprints = buildFingerprints(
+      [
+        {
+          label: 'index entry',
+          text: 'PhilHealth membership registration',
+          kind: 'text',
+        },
+      ],
+      ['content/services/health-services/philhealth-membership-registration.md']
+    );
+    expect(fingerprints).toEqual([]);
+  });
+
   it('fingerprints string values of JSON records', () => {
     const fingerprints = buildFingerprints(
       [
