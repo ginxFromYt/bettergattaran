@@ -21,6 +21,19 @@ Publication and verification are intentionally separate.
 
 `VITE_ALLOW_SOURCED_CONTENT=false` prevents sourced records from displaying even when their publication status is `published`.
 
+### One visibility policy
+
+The rules above are implemented once, in `scripts/lib/visibility.mjs`. The app (through `src/lib/contentGovernance.ts`), the pre-renderer, the sitemap, What's new, the build's draft exclusion, the search indexer and the audit all use it. Do not copy the rules elsewhere.
+
+### Non-public content never ships
+
+Hiding a record is not enough: the document viewer loads content through dynamic imports, which would otherwise bundle every file under `content/` as a downloadable JS chunk. In production builds (`npm run build`):
+
+- a Vite plugin (`scripts/lib/content-visibility-plugin.mjs`) replaces every non-public Markdown file and record JSON in `content/services`, `content/government`, `content/hotlines` and `content/projects` with an empty draft stub, and removes non-public entries from category `index.yaml` files;
+- `scripts/check-dist-leaks.mjs` then scans everything in `dist/` and fails the build if text from any non-public record, hidden index entry or `content/request-drafts/` file appears there.
+
+`npm run dev` still shows drafts locally so maintainers can preview them. A draft may therefore contain working text, but keep unverified personal information out of the repository altogether: the repository itself is public.
+
 ## Source types
 
 Use one controlled value for every source: `lgu_official`, `national_government`, `provincial_government`, `official_government_publication`, `official_government_social_media`, `public_document`, or `other_public_source`. A third-party source must never be labeled official.
@@ -105,4 +118,4 @@ Public pages link to a correction form that validates lengths and HTTP(S) source
 
 ## Security boundary
 
-There is no admin endpoint or client-authorized verification action. Only reviewed repository changes can alter lifecycle metadata. Do not add secrets, tokens, private notes, or personal data to the repository. Search indexing uses the same public-visibility policy as page listings and direct routes.
+There is no admin endpoint or client-authorized verification action. Only reviewed repository changes can alter lifecycle metadata. Do not add secrets, tokens, private notes, or personal data to the repository. Search indexing and the production bundle use the same public-visibility policy as page listings and direct routes.
