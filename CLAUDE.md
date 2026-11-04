@@ -2,86 +2,105 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project
+
+Better Gattaran is an independent, volunteer-led civic information portal for Gattaran, Cagayan, forked from BetterLocalGov. It is **not** the official municipal website. The guiding rule: never publish a municipal fact without a recorded public source. Leave a section empty rather than infer officials, contacts, fees, schedules or procedures from snippets, directories, other localities or undated posts. See `README.md`, `docs/content-verification.md` and `docs/sources.md`.
+
 ## Commands
 
 ```bash
-npm run dev          # Start development server (localhost:5173)
-npm run build        # TypeScript check + Vite production build
-npm run lint         # Run ESLint
-npm run lint:fix     # Auto-fix ESLint issues
-npm run format       # Format with Prettier
-npm run dev:yaml     # Convert YAML to JSON, then start dev server
-npm run setup        # Interactive setup script for new installations
+npm run dev            # Dev server (localhost:5173); drafts are visible here
+npm run build          # tsc + vite build + prerender + dist leak check
+npm test               # Vitest (run once); npm run test:watch to watch
+npm run lint           # ESLint; npm run lint:fix to auto-fix
+npm run format         # Prettier write; npm run format:check to check
+npm run content:audit  # Validate content/ records and governance metadata
+npm run check:leaks    # Re-run the dist/ draft leak check on its own
+npm run index-content  # Index public content into Meilisearch
 ```
 
-Pre-commit hook runs `lint-staged` automatically (ESLint + Prettier on staged files).
+CI (`.github/workflows/content.yml`) runs `content:audit`, `test`, `lint` and `build` on every PR. Run all four before committing content or code changes. Scheduled jobs check source links weekly and reverification monthly, opening GitHub issues.
+
+Pre-commit hook runs `lint-staged` (ESLint + Prettier on staged files).
 
 ## Architecture
 
-This is a React 19 + TypeScript + Vite app for Philippine Local Government Units (LGUs). It uses React Router, Tailwind CSS, i18next for multilingual support, and a YAML-based content system.
+Static React 19 + TypeScript + Vite + Tailwind 4 app using `react-router` v8, i18next, `react-helmet-async` and `nuqs`. No backend, database or login: maintainers govern content through reviewed repository changes, with `governance/` and Git history as the audit trail.
 
 ### Routing
 
-`src/App.tsx` defines six routes:
+`src/App.tsx` (pages are lazy-loaded from `src/pages/`):
 
-- `/` — Home page
-- `/services` / `/services/:category` — Services listing
-- `/government` / `/government/:category` — Government section listing
-- `/:documentSlug` / `/:lang/:documentSlug` — Document viewer (markdown content, used by both services and government)
+- `/` Home, `/about`, `/hotlines`, `/foi-requests`, `/whats-new`, `/report-incorrect-information`
+- `/services`, `/services/:category`, `/services/:category/:documentSlug`
+- `/government`, `/government/:category`, `/government/:category/:documentSlug`
+- `/government/projects`: national-agency projects table (declared before `/government/:category`)
+- `/search`: only when Meilisearch is configured (`isMeilisearchEnabled`)
+- `/:lang/:documentSlug`, `/:documentSlug`: legacy document routes
 
-### Content System
+### Content system
 
-Content is stored as YAML and Markdown files under `content/`. Two parallel content trees exist:
+Content lives in `content/`. Two Markdown document trees share one loader:
 
-#### Services (`content/services/`)
+1. **Top-level categories:** `src/data/services.yaml` and `src/data/government.yaml` (name, slug, icon, description; `icon` must be a valid Lucide icon name).
+2. **Category index:** `content/{services|government}/{category}/index.yaml`, a `pages:` array. Each entry needs `name`, `slug`, `description`, `publicationStatus` and `verificationStatus`, or it is not listed.
+3. **Page:** `content/{services|government}/{category}/{slug}.md` plus a companion `{slug}.json` holding governance metadata (below) and optional `{PLACEHOLDER}` values.
 
-1. **`src/data/services.yaml`** — Top-level service categories (name, slug, icon, description). The `icon` field must be a valid Lucide React icon name.
-2. **`content/services/{category-slug}/index.yaml`** — Lists pages under each category (`pages:` array with `name`, `slug`, `description`).
-3. **`content/services/{category-slug}/{page-slug}.md`** — Actual markdown content for each service page.
+When adding a category: add it to the top-level YAML, create its `index.yaml`, and add the static `?raw` import and entry to the single `categoryIndexMap` in `src/data/yamlLoader.ts` (services and government share it). Some government categories in `government.yaml` intentionally have no index yet.
 
-When adding a new service category, you must:
+`src/lib/markdownLoader.ts` loads Markdown and companion JSON via dynamic `import()`. It takes the title from the first `# Heading` and the description from the first paragraph. `interpolate()` replaces `{PLACEHOLDER}` tokens: JSON value, then `VITE_<KEY>` env var, otherwise left unchanged.
 
-- Add an entry to `src/data/services.yaml`
-- Create `content/services/{slug}/index.yaml`
-- Add the static import and mapping entry to `src/data/yamlLoader.ts` (`categoryIndexMap`)
+Structured record collections (JSON, one file per record):
 
-#### Government (`content/government/`)
+- `content/hotlines/`: emergency contacts (`src/lib/hotlines.ts`, static imports)
+- `content/projects/`: national-agency projects in Gattaran (`src/lib/projects.ts`, `import.meta.glob`)
+- `content/requests/`: filed FOI/information requests (`src/lib/foiRequests.ts`)
+- `content/request-drafts/`: unfiled request drafts. Deliberately outside every import pattern so they never reach the bundle. Filing steps are in `docs/phase-4-handoff.md` §5.
 
-1. **`src/data/government.yaml`** — Top-level government categories (name, slug, icon, description).
-2. **`content/government/{category-slug}/index.yaml`** — Lists pages under each category.
-3. **`content/government/{category-slug}/{page-slug}.md`** — Markdown content for each department/office page.
+### Content governance
 
-When adding a new government category, you must:
+Every companion/record JSON carries:
 
-- Add an entry to `src/data/government.yaml`
-- Create `content/government/{slug}/index.yaml`
-- Add the static import and mapping entry to `src/data/yamlLoader.ts` (`govCategoryIndexMap`)
+- `publicationStatus`: `draft` | `published` | `archived` (missing means draft)
+- `scope`: `local` | `national_applicable`. National records must cite a `national_government` or `official_government_publication` source and show a fixed notice.
+- `provenance`: `verificationStatus` (`awaiting_verification` | `sourced` | `verified` | `outdated`), `lastUpdatedAt`, `lastVerifiedAt`, `asOf`, and `sources[]` (`title`, `organization`, `url`, `type`, optional `publishedAt`, `asOf`, `locator`)
+- `containsFigures: true` requires a `locator` on every source. Project records must set it and use `local` scope.
 
-Markdown files are loaded dynamically via `import()` in `src/lib/markdownLoader.ts`. The title is extracted from the first `# Heading` and the description from the first paragraph.
+Rules:
 
-#### Companion JSON files
+- A record is public only if published, has provenance, and is `verified`, `outdated` or (when `VITE_ALLOW_SOURCED_CONTENT` is not `false`) `sourced`.
+- **The one visibility policy is `scripts/lib/visibility.mjs`** (typed in `visibility.d.mts`, re-exported by `src/lib/contentGovernance.ts`). The app, the build plugin, the prerenderer, the leak check, the search indexer and the audit all use it. Never duplicate these rules.
+- Only a human maintainer checking the source in a browser may promote `sourced` to `verified`. An agent sets `sourced` at most.
+- Every content change also updates `governance/content-register.json` and `governance/revisions.json`.
+- The repository is public: no unverified personal information, secrets or reporter details in content or governance files.
 
-A markdown page can have an optional companion JSON file with the same slug (e.g. `executive.md` + `executive.json`). The loader attempts to import the JSON and passes it to `interpolate()`, which replaces `{PLACEHOLDER}` tokens in the markdown. Resolution order: JSON value → `VITE_<KEY>` env var → unchanged token.
+### Build pipeline
 
-Example: `{MAYOR}` in the markdown is replaced with the `MAYOR` value from `executive.json`, or `VITE_MAYOR` if no JSON file exists.
+- `scripts/lib/content-visibility-plugin.mjs` (Vite plugin, build only) replaces non-public Markdown/JSON with empty stubs and strips non-public `index.yaml` entries.
+- `scripts/prerender.mjs` renders every public route from `src/prerender/publicRoutes.ts` to `dist/**/index.html` with per-page SEO, plus `sitemap.xml`, `robots.txt` and `whats-new.json`.
+- `scripts/check-dist-leaks.mjs` fails the build if draft text appears in `dist/`.
+- Deployment config (`vercel.json`, `public/.htaccess`, `terraform/`) is not to be changed without asking. See `docs/spa-deployment.md`.
 
 ### Internationalization
 
-- i18next with `HttpBackend` loads translation files from `public/locales/{lang}/common.json`
-- Language detection order: `localStorage` → `navigator` → `htmlTag`
-- Fallback language: `en`
-- Supported languages are defined in `src/types/index.ts` (`LanguageType`)
-- Currently only `public/locales/en/common.json` exists
+- i18next with `HttpBackend` loads `public/locales/{lang}/common.json`. Detection order: `localStorage`, `navigator`, `htmlTag`. Fallback `en`.
+- Selectable languages are in `LANGUAGES` in `src/i18n/languages.ts`. Currently only `en`.
+- `fil`, `ilo` and `ibg` are in `PLANNED_LANGUAGES`: scaffolded but disabled until a fluent human speaker approves the strings. Do not enable them or machine-translate. See `docs/languages.md`.
 
-### Environment Variables
+### Environment variables
 
-The app uses `VITE_GOVERNMENT_NAME` (referenced in `Services.tsx`) for branding. Additional env vars are configured via the setup script.
+See `env.example`; copy it to `.env.local`. Key groups: site and government identity (`VITE_SITE_NAME`, `VITE_GOVERNMENT_NAME`, ...), `VITE_WEBSITE_URL` (canonical origin, default `https://bettergattaran.org`), content governance (`VITE_ALLOW_SOURCED_CONTENT`, `VITE_CORRECTION_*`, `VITE_CONTENT_REVERIFY_MONTHS`, read in `src/config/contentGovernance.ts`), and `VITE_WEATHER_API_BASE_URL`. The weather card falls back to Open-Meteo and always links to PAGASA.
 
-### UI Components
+### UI components
 
-Reusable primitives live in `src/components/ui/`: `Section`, `Heading`, `Text`, `Card`, `ListItem`, `Breadcrumbs`, `ScrollToTop`. Use these instead of raw HTML elements for consistency.
+- Primitives in `src/components/ui/`: `Section`, `Heading`, `Text`, `Breadcrumbs`, `ScrollToTop`, `ThemeSelector`. Use them instead of raw HTML elements.
+- Content components in `src/components/content/`: `ContentProvenance`, `VerificationBadge`, `NationalScopeNotice`, `ProjectsTable` and others.
 
-### Code Style
+### Tests
+
+Vitest + Testing Library (jsdom). Tests sit next to their source (`*.test.ts(x)` in `src/` and `scripts/`). Add or update tests for any change to governance, visibility or prerender logic.
+
+### Code style
 
 - Single quotes, 2-space indentation, trailing commas (ES5), semicolons, 80-char line width (enforced by Prettier)
 - Arrow functions omit parens for single arguments
